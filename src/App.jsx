@@ -39,17 +39,8 @@ function App() {
 		<Routes>
 			<Route path="/" element={<LandingPage />} />
 			<Route path="/login" element={<LoginPage />} />
-			{/*<Route path="/app" element={
-        <ProtectedRoute><Home /></ProtectedRoute>
-      } />*/}
-			<Route
-				path="/dashboard"
-				element={
-					<ProtectedRoute>
-						<Dashboard />
-					</ProtectedRoute>
-				}
-			/>
+			<Route path="/app" element={<Navigate to="/dashboard/map" replace />} />
+			<Route path="/dashboard" element={<Navigate to="/dashboard/home" replace />} />
 			<Route
 				path="/dashboard/:page"
 				element={

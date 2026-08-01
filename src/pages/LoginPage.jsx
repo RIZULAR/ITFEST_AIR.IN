@@ -1,12 +1,10 @@
 /** @format */
 
 import { useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
-
 import LoginBgImg from '@/assets/images/login-bg.jpg';
-
 import { signInWithPassword } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 function Spinner() {
 	return (
@@ -35,6 +33,7 @@ function Spinner() {
 
 export default function LoginPage() {
 	const navigate = useNavigate();
+	const { loginAsDemo } = useAuth();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -53,6 +52,11 @@ export default function LoginPage() {
 		}
 	}
 
+	function handleDemoLogin() {
+		loginAsDemo();
+		navigate("/dashboard/home");
+	}
+
 	return (
 		<div className="min-h-screen flex">
 			{/* Left Section - Image */}
@@ -66,11 +70,11 @@ export default function LoginPage() {
 				{/* Gradient Overlay */}
 				<div className="absolute inset-0 bg-gradient-to-r from-emerald-950/80 via-emerald-900/40 to-transparent" />
 
-				{/* Optional Content */}
+				{/* Content */}
 				<div className="relative z-10 flex flex-col justify-end p-12 text-white">
 					<h1 className="text-5xl font-bold mb-4">HARVEY</h1>
 					<p className="max-w-md text-lg text-white/90">
-						Decision Support System for Irrigation
+						Decision Support System for Irrigation (AIR.IN Platform)
 					</p>
 				</div>
 			</div>
@@ -79,10 +83,25 @@ export default function LoginPage() {
 			<div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-stone-50">
 				<div className="w-full max-w-sm">
 					<div className="mb-8">
-						<h2 className="text-2xl font-bold text-stone-800">Masuk</h2>
+						<h2 className="text-2xl font-bold text-stone-800">Masuk Platform</h2>
 						<p className="text-stone-500 text-sm mt-1">
-							Masukkan email dan password Anda.
+							Silakan masuk atau gunakan Mode Demo Instan.
 						</p>
+					</div>
+
+					{/* Demo Mode Instant Access Button */}
+					<div className="mb-6">
+						<button
+							type="button"
+							onClick={handleDemoLogin}
+							className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 border border-emerald-500"
+						>
+							<span>🚀 Masuk Mode Demo (Langsung Coba Platform)</span>
+						</button>
+						<div className="relative my-6 text-center">
+							<div className="absolute inset-0 flex items-center"><div className="w-full border-t border-stone-300"></div></div>
+							<span className="relative bg-stone-50 px-3 text-xs text-stone-400 font-medium">atau masuk dengan akun</span>
+						</div>
 					</div>
 
 					{error && (
@@ -121,9 +140,9 @@ export default function LoginPage() {
 						<button
 							type="submit"
 							disabled={loading}
-							className="w-full bg-emerald-900 hover:bg-emerald-800 disabled:bg-emerald-800 text-white font-semibold py-3 rounded-lg text-sm transition flex items-center justify-center gap-2"
+							className="w-full bg-stone-800 hover:bg-stone-900 disabled:bg-stone-800 text-white font-semibold py-3 rounded-lg text-sm transition flex items-center justify-center gap-2"
 						>
-							{loading ? <Spinner /> : "Masuk"}
+							{loading ? <Spinner /> : "Masuk dengan Email"}
 						</button>
 					</form>
 

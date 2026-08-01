@@ -107,10 +107,10 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 				}}
 			>
 				<Stack direction="row" alignItems="center" spacing={2}>
-					<duv className="flex items-center gap-3">
+					<div className="flex items-center gap-3">
 						<img src={LogoImg} className="h-10" alt="Harvey Logo" />
 						<p className="text-2xl font-bold">Harvey</p>
-					</duv>
+					</div>
 				</Stack>
 			</Box>
 
