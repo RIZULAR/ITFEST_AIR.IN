@@ -42,15 +42,15 @@ function MapUpdater({ center, zoom }) {
 function MapClicker({ onClick }) {
     const map = useMap()
     useEffect(() => {
-        const h = (e) => onClick(e.latlng)
+        const h = (e) => onClick({ lat: e.latlng.lat, lng: e.latlng.lng })
         map.on('click', h)
         return () => map.off('click', h)
     }, [map])
     return null
 }
 
-const DEFAULT_CENTER = [-6.9, 107.6]
-const DEFAULT_ZOOM = 10
+const DEFAULT_CENTER = [-7.4478, 112.7183]
+const DEFAULT_ZOOM = 12
 
 export default function MapPage({ fields, onFieldCreate }) {
     const [center, setCenter] = useState(DEFAULT_CENTER)
@@ -91,6 +91,7 @@ export default function MapPage({ fields, onFieldCreate }) {
             const finalField = {
                 name: fieldForm.name,
                 lat,
+                lng: lon,
                 lon,
                 area_ha,
                 plantingDate: fieldForm.plantingDate || null,
@@ -113,7 +114,19 @@ export default function MapPage({ fields, onFieldCreate }) {
         }
     }
 
-    const finishedPolygons = fields.filter(f => f.polygonPoints).map(f => f.polygonPoints)
+    const finishedPolygons = fields
+        .filter(f => f.polygonPoints && Array.isArray(f.polygonPoints))
+        .map(f => f.polygonPoints.map(p => ({
+            lat: Number(p.lat ?? p[0]),
+            lng: Number(p.lng ?? p.lon ?? p[1])
+        })).filter(p => !isNaN(p.lat) && !isNaN(p.lng)))
+
+    const validDrawPoints = drawPoints
+        .map(p => ({
+            lat: Number(p.lat ?? p[0]),
+            lng: Number(p.lng ?? p.lon ?? p[1])
+        }))
+        .filter(p => !isNaN(p.lat) && !isNaN(p.lng))
 
     return (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
@@ -126,7 +139,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <MapUpdater center={center} zoom={zoom} />
-                    <MapClicker onClick={latlng => setDrawPoints(p => [...p, latlng])} />
+                    <MapClicker onClick={pt => setDrawPoints(p => [...p, pt])} />
 
                     {/* Saved field polygons */}
                     {finishedPolygons.map((pts, i) => (
@@ -143,16 +156,16 @@ export default function MapPage({ fields, onFieldCreate }) {
                     ))}
 
                     {/* Drawing preview */}
-                    {drawPoints.length > 0 && (
+                    {validDrawPoints.length > 0 && (
                         <>
                             <Polyline
-                                positions={drawPoints}
+                                positions={validDrawPoints}
                                 pathOptions={{ color: '#4caf50', weight: 2.5, dashArray: '6 4' }}
                             />
-                            {drawPoints.map((p, i) => (
+                            {validDrawPoints.map((p, i) => (
                                 <CircleMarker
                                     key={i}
-                                    center={p}
+                                    center={[p.lat, p.lng]}
                                     radius={i === 0 ? 8 : 5}
                                     pathOptions={{
                                         color: '#2e7d32',
@@ -162,9 +175,9 @@ export default function MapPage({ fields, onFieldCreate }) {
                                     }}
                                 />
                             ))}
-                            {drawPoints.length >= 2 && (
+                            {validDrawPoints.length >= 2 && (
                                 <Polyline
-                                    positions={[drawPoints[drawPoints.length - 1], drawPoints[0]]}
+                                    positions={[validDrawPoints[validDrawPoints.length - 1], validDrawPoints[0]]}
                                     pathOptions={{ color: '#4caf50', weight: 1.5, dashArray: '4 4', opacity: 0.6 }}
                                 />
                             )}
@@ -253,10 +266,10 @@ export default function MapPage({ fields, onFieldCreate }) {
                 </Box>
 
                 {/* Point counter */}
-                {drawPoints.length > 0 && (
+                {validDrawPoints.length > 0 && (
                     <Box sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 600 }}>
                         <Chip
-                            label={`${drawPoints.length} titik${drawPoints.length < 3 ? ` (min ${3 - drawPoints.length} lagi)` : ''}`}
+                            label={`${validDrawPoints.length} titik${validDrawPoints.length < 3 ? ` (min ${3 - validDrawPoints.length} lagi)` : ''}`}
                             size="small"
                             sx={{ bgcolor: 'white', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
                         />

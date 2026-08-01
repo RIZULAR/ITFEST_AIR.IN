@@ -15,12 +15,19 @@ const INITIAL_MOCK_FIELDS = [
     area_ha: 2.5,
     lat: -7.4478,
     lng: 112.7183,
+    lon: 112.7183,
     plantingDate: '2026-06-01',
     sand_pct: 35,
     temp: 31,
     humidity: 68,
     windSpeed: 8,
-    rainfall30d: { total_mm: 45, avg_mm: 1.5 }
+    rainfall30d: { total_mm: 45, avg_mm: 1.5 },
+    polygonPoints: [
+      { lat: -7.4450, lng: 112.7150 },
+      { lat: -7.4450, lng: 112.7210 },
+      { lat: -7.4500, lng: 112.7210 },
+      { lat: -7.4500, lng: 112.7150 }
+    ]
   },
   {
     id: 'f-2',
@@ -31,12 +38,19 @@ const INITIAL_MOCK_FIELDS = [
     area_ha: 1.8,
     lat: -7.4722,
     lng: 112.4338,
+    lon: 112.4338,
     plantingDate: '2026-05-15',
     sand_pct: 60,
     temp: 33,
     humidity: 62,
     windSpeed: 12,
-    rainfall30d: { total_mm: 20, avg_mm: 0.6 }
+    rainfall30d: { total_mm: 20, avg_mm: 0.6 },
+    polygonPoints: [
+      { lat: -7.4700, lng: 112.4310 },
+      { lat: -7.4700, lng: 112.4360 },
+      { lat: -7.4740, lng: 112.4360 },
+      { lat: -7.4740, lng: 112.4310 }
+    ]
   },
   {
     id: 'f-3',
@@ -47,19 +61,36 @@ const INITIAL_MOCK_FIELDS = [
     area_ha: 3.2,
     lat: -7.1186,
     lng: 112.4158,
+    lon: 112.4158,
     plantingDate: '2026-04-10',
     sand_pct: 20,
     temp: 30,
     humidity: 75,
     windSpeed: 6,
-    rainfall30d: { total_mm: 85, avg_mm: 2.8 }
+    rainfall30d: { total_mm: 85, avg_mm: 2.8 },
+    polygonPoints: [
+      { lat: -7.1160, lng: 112.4130 },
+      { lat: -7.1160, lng: 112.4180 },
+      { lat: -7.1210, lng: 112.4180 },
+      { lat: -7.1210, lng: 112.4130 }
+    ]
   }
 ]
 
 function getLocalFields() {
   try {
     const data = localStorage.getItem('harvey_fields')
-    if (data) return JSON.parse(data)
+    if (data) {
+      const parsed = JSON.parse(data)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(f => ({
+          ...f,
+          lat: f.lat ?? f.latitude ?? -7.4478,
+          lng: f.lng ?? f.lon ?? f.longitude ?? 112.7183,
+          lon: f.lon ?? f.lng ?? f.longitude ?? 112.7183,
+        }))
+      }
+    }
     localStorage.setItem('harvey_fields', JSON.stringify(INITIAL_MOCK_FIELDS))
     return INITIAL_MOCK_FIELDS
   } catch {
@@ -91,6 +122,9 @@ export async function storeField(field) {
   const newField = {
     ...field,
     id: field.id || `f-${Date.now()}`,
+    lat: field.lat ?? field.latitude ?? -7.4478,
+    lng: field.lng ?? field.lon ?? field.longitude ?? 112.7183,
+    lon: field.lon ?? field.lng ?? field.longitude ?? 112.7183,
     plantingDate: field.plantingDate || new Date().toISOString().split('T')[0]
   }
   local.unshift(newField)
