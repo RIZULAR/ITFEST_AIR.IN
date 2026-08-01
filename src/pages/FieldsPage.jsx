@@ -87,9 +87,13 @@ function PolygonMapPreview({ field }) {
 			scrollWheelZoom={false}
 		>
 			<TileLayer
-				url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+				url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
 				maxZoom={19}
-				attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+				attribution="&copy; Esri Satellite"
+			/>
+			<TileLayer
+				url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
+				maxZoom={19}
 			/>
 			<MapAutoBounds points={pts} center={[centerLat, centerLng]} />
 			{pts.length >= 3 ? (

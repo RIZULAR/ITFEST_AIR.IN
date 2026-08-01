@@ -24,6 +24,7 @@ import UndoIcon from '@mui/icons-material/Undo'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import ClearIcon from '@mui/icons-material/Clear'
 import CheckIcon from '@mui/icons-material/Check'
+import LayersIcon from '@mui/icons-material/Layers'
 import Paper from '@mui/material/Paper'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircle';
 import { getBrowserLocation, calcAreaFromPoints, calcCentroidFromPoints } from '../services/geoService.js'
@@ -50,7 +51,7 @@ function MapClicker({ onClick }) {
 }
 
 const DEFAULT_CENTER = [-7.4478, 112.7183]
-const DEFAULT_ZOOM = 12
+const DEFAULT_ZOOM = 13
 
 export default function MapPage({ fields, onFieldCreate }) {
     const [center, setCenter] = useState(DEFAULT_CENTER)
@@ -60,6 +61,7 @@ export default function MapPage({ fields, onFieldCreate }) {
     const [fieldForm, setFieldForm] = useState({ name: '', plantingDate: '' })
     const [saving, setSaving] = useState(false)
     const [highlightedField, setHighlightedField] = useState(null)
+    const [mapType, setMapType] = useState('satellite') // 'satellite' or 'vector'
     const nameInputRef = useRef(null)
 
     useEffect(() => {
@@ -137,11 +139,25 @@ export default function MapPage({ fields, onFieldCreate }) {
                     zoom={zoom}
                     style={{ height: '100%', width: '100%' }}
                 >
-                    <TileLayer
-                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                        maxZoom={19}
-                        attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-                    />
+                    {mapType === 'satellite' ? (
+                        <>
+                            <TileLayer
+                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                maxZoom={19}
+                                attribution="&copy; Esri Satellite"
+                            />
+                            <TileLayer
+                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
+                                maxZoom={19}
+                            />
+                        </>
+                    ) : (
+                        <TileLayer
+                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                            maxZoom={19}
+                            attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+                        />
+                    )}
                     <MapUpdater center={center} zoom={zoom} />
                     <MapClicker onClick={pt => setDrawPoints(p => [...p, pt])} />
 
@@ -151,10 +167,10 @@ export default function MapPage({ fields, onFieldCreate }) {
                             key={i}
                             positions={pts}
                             pathOptions={{
-                                color: '#2e7d32',
-                                weight: 2,
-                                fillColor: '#2e7d32',
-                                fillOpacity: 0.15,
+                                color: '#00e676',
+                                weight: 2.5,
+                                fillColor: '#00e676',
+                                fillOpacity: 0.25,
                             }}
                         />
                     ))}
@@ -164,7 +180,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                         <>
                             <Polyline
                                 positions={validDrawPoints}
-                                pathOptions={{ color: '#4caf50', weight: 2.5, dashArray: '6 4' }}
+                                pathOptions={{ color: '#76ff03', weight: 3, dashArray: '6 4' }}
                             />
                             {validDrawPoints.map((p, i) => (
                                 <CircleMarker
@@ -172,17 +188,17 @@ export default function MapPage({ fields, onFieldCreate }) {
                                     center={[p.lat, p.lng]}
                                     radius={i === 0 ? 8 : 5}
                                     pathOptions={{
-                                        color: '#2e7d32',
-                                        fillColor: i === 0 ? '#2e7d32' : '#ffffff',
+                                        color: '#00e676',
+                                        fillColor: i === 0 ? '#76ff03' : '#ffffff',
                                         fillOpacity: 1,
-                                        weight: 2,
+                                        weight: 2.5,
                                     }}
                                 />
                             ))}
                             {validDrawPoints.length >= 2 && (
                                 <Polyline
                                     positions={[validDrawPoints[validDrawPoints.length - 1], validDrawPoints[0]]}
-                                    pathOptions={{ color: '#4caf50', weight: 1.5, dashArray: '4 4', opacity: 0.6 }}
+                                    pathOptions={{ color: '#76ff03', weight: 2, dashArray: '4 4', opacity: 0.7 }}
                                 />
                             )}
                         </>
@@ -193,48 +209,37 @@ export default function MapPage({ fields, onFieldCreate }) {
                         <Polygon
                             positions={highlightedField}
                             pathOptions={{
-                                color: '#0288d1',
-                                weight: 3,
-                                fillColor: '#03a9f4',
-                                fillOpacity: 0.25,
+                                color: '#00b0ff',
+                                weight: 3.5,
+                                fillColor: '#40c4ff',
+                                fillOpacity: 0.35,
                                 dashArray: '8 4',
                             }}
                         />
                     )}
                 </MapContainer>
 
-                {/* Controls */}
-                <Box sx={{
-                    position: 'absolute', bottom: { xs: 16, md: 16 }, right: { xs: 8, md: 16 }, zIndex: 600, display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end',
-                }}>
-                    {highlightedField && (
-                        <Paper
-                            elevation={3}
-                            component={Link}
-                            to="/dashboard/fields"
-                            sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'primary.main', color: 'white', borderRadius: 2, textDecoration: 'none', cursor: 'pointer' }}
-                        >
-                            <CheckCircleOutlineIcon fontSize="small" />
-                            <Typography variant="body2" fontWeight={600}>Lahan disimpan!</Typography>
-                        </Paper>
-                    )}
+                {/* Map mode switcher top-left */}
+                <Box sx={{ position: 'absolute', top: { xs: 8, md: 16 }, left: { xs: 8, md: 16 }, zIndex: 600 }}>
                     <Button
-                        startIcon={<MyLocationIcon />}
-                        onClick={async () => {
-                            try {
-                                const loc = await getBrowserLocation()
-                                setCenter([loc.lat, loc.lon])
-                                setZoom(16)
-                            } catch (e) { console.error(e) }
-                        }}
+                        startIcon={<LayersIcon />}
+                        onClick={() => setMapType(m => m === 'satellite' ? 'vector' : 'satellite')}
                         size="small"
                         variant="contained"
-                        sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                        sx={{
+                            bgcolor: 'rgba(255,255,255,0.92)',
+                            color: 'text.primary',
+                            fontWeight: 700,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            backdropFilter: 'blur(4px)',
+                            '&:hover': { bgcolor: '#ffffff' }
+                        }}
                     >
-                        Lokasi Saya
+                        {mapType === 'satellite' ? '🛰️ Mode Satelit' : '🗺️ Mode Peta Jalan'}
                     </Button>
                 </Box>
 
+                {/* Controls top-right */}
                 <Box sx={{
                     position: 'absolute', top: { xs: 8, md: 16 }, right: { xs: 8, md: 16 }, zIndex: 600, display: 'flex', gap: 0.5, flexWrap: 'wrap',
                 }}>
@@ -269,6 +274,38 @@ export default function MapPage({ fields, onFieldCreate }) {
                     </Button>
                 </Box>
 
+                {/* Controls bottom-right */}
+                <Box sx={{
+                    position: 'absolute', bottom: { xs: 16, md: 16 }, right: { xs: 8, md: 16 }, zIndex: 600, display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end',
+                }}>
+                    {highlightedField && (
+                        <Paper
+                            elevation={3}
+                            component={Link}
+                            to="/dashboard/fields"
+                            sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'primary.main', color: 'white', borderRadius: 2, textDecoration: 'none', cursor: 'pointer' }}
+                        >
+                            <CheckCircleOutlineIcon fontSize="small" />
+                            <Typography variant="body2" fontWeight={600}>Lahan disimpan!</Typography>
+                        </Paper>
+                    )}
+                    <Button
+                        startIcon={<MyLocationIcon />}
+                        onClick={async () => {
+                            try {
+                                const loc = await getBrowserLocation()
+                                setCenter([loc.lat, loc.lon])
+                                setZoom(16)
+                            } catch (e) { console.error(e) }
+                        }}
+                        size="small"
+                        variant="contained"
+                        sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                    >
+                        Lokasi Saya
+                    </Button>
+                </Box>
+
                 {/* Point counter */}
                 {validDrawPoints.length > 0 && (
                     <Box sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 600 }}>
@@ -283,22 +320,18 @@ export default function MapPage({ fields, onFieldCreate }) {
                 {/* Legend */}
                 <Box sx={{
                     position: 'absolute', bottom: { xs: 60, md: 16 }, left: { xs: 8, md: 16 }, zIndex: 600,
-                    bgcolor: 'white', borderRadius: 1.5, px: 1.5, py: 1,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                    bgcolor: 'rgba(255,255,255,0.9)', borderRadius: 1.5, px: 1.5, py: 1,
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)', backdropFilter: 'blur(4px)',
                     display: { xs: 'none', sm: 'block' },
                 }}>
                     <Stack spacing={0.5}>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Box sx={{ width: 14, height: 14, border: '2px solid #2e7d32', borderRadius: '2px', bgcolor: 'rgba(45,106,79,0.15)' }} />
-                            <Typography variant="caption">Lahan tersimpan</Typography>
+                            <Box sx={{ width: 14, height: 14, border: '2px solid #00e676', borderRadius: '2px', bgcolor: 'rgba(0,230,118,0.25)' }} />
+                            <Typography variant="caption" fontWeight={600}>Lahan tersimpan</Typography>
                         </Stack>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Box sx={{ width: 14, height: 14, border: '2px dashed #4caf50', borderRadius: '2px' }} />
-                            <Typography variant="caption">Gambar baru</Typography>
-                        </Stack>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                            <Box sx={{ width: 14, height: 14, border: '2px dashed #2D6A4F', borderRadius: '2px', bgcolor: 'rgba(45,106,79,0.15)' }} />
-                            <Typography variant="caption">Baru disimpan</Typography>
+                            <Box sx={{ width: 14, height: 14, border: '2px dashed #76ff03', borderRadius: '2px' }} />
+                            <Typography variant="caption" fontWeight={600}>Gambar baru</Typography>
                         </Stack>
                     </Stack>
                 </Box>
