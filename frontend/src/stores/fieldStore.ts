@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Field, WeatherData, FieldRisk, IrrigationSchedule } from '../types'
 import { fetchWeatherData } from '../services/weatherService'
 import { calculateFieldRisk, allocateWaterEquitably } from '../services/riskCalculator'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 const MOCK_FIELDS: Field[] = [
   {
@@ -120,13 +121,13 @@ function getInitialSchedules(): IrrigationSchedule[] {
 }
 
 export const useFieldStore = defineStore('fields', () => {
-  // Load fields from localStorage or mock
   const fields = ref<Field[]>(getInitialFields())
   const schedules = ref<IrrigationSchedule[]>(getInitialSchedules())
 
   const elNinoSeverity = ref<number>(1) // 1 - 10
   const totalWaterSupply = ref<number>(150000) // Total Liter pasokan air
   const isLoadingWeather = ref<boolean>(false)
+  const isSyncingSupabase = ref<boolean>(false)
 
   const weather = ref<WeatherData>({
     temperature: 32,
@@ -139,10 +140,54 @@ export const useFieldStore = defineStore('fields', () => {
     et0: 4.2,
   })
 
-  // Save fields to localStorage
+  // Save to localStorage fallback
   function saveToStorage() {
     localStorage.setItem('harvey_fields', JSON.stringify(fields.value))
     localStorage.setItem('harvey_schedules', JSON.stringify(schedules.value))
+  }
+
+  // Fetch from Supabase cloud database if configured
+  async function syncWithSupabase() {
+    if (!isSupabaseConfigured || !supabase) return
+
+    isSyncingSupabase.value = true
+    try {
+      // 1. Fetch Fields
+      const { data: dbFields, error: fieldErr } = await supabase.from('fields').select('*')
+      if (!fieldErr && dbFields && dbFields.length > 0) {
+        fields.value = dbFields.map((f: any) => ({
+          id: f.id,
+          name: f.name,
+          owner: f.owner,
+          cropType: f.crop_type,
+          soilType: f.soil_type,
+          growthStage: f.growth_stage,
+          areaHa: Number(f.area_ha),
+          coordinates: f.coordinates,
+          center: f.center,
+          lastIrrigated: f.last_irrigated,
+          notes: f.notes,
+        }))
+      }
+
+      // 2. Fetch Schedules
+      const { data: dbSchedules, error: schErr } = await supabase.from('schedules').select('*')
+      if (!schErr && dbSchedules && dbSchedules.length > 0) {
+        schedules.value = dbSchedules.map((s: any) => ({
+          id: s.id,
+          fieldId: s.field_id,
+          fieldName: s.field_name,
+          scheduledDate: s.scheduled_date,
+          waterVolumeLiters: Number(s.water_volume_liters),
+          status: s.status,
+          notes: s.notes,
+        }))
+      }
+    } catch (e) {
+      console.warn('Supabase sync warning:', e)
+    } finally {
+      isSyncingSupabase.value = false
+    }
   }
 
   // Load weather
@@ -172,49 +217,78 @@ export const useFieldStore = defineStore('fields', () => {
   })
 
   const harveyScore = computed(() => {
-    // Score ketahanan klaster pertanian (0 - 100)
     const avgRisk = fieldRisks.value.reduce((acc, fr) => acc + fr.riskScore, 0) / (fieldRisks.value.length || 1)
     return Math.max(0, Math.round(100 - avgRisk))
   })
 
-  // Actions CRUD
-  function addField(fieldData: Omit<Field, 'id'>) {
+  // Actions CRUD with Supabase + Local Storage
+  async function addField(fieldData: Omit<Field, 'id'>) {
+    const newId = 'f-' + Date.now()
     const newField: Field = {
       ...fieldData,
-      id: 'f-' + Date.now(),
+      id: newId,
     }
     fields.value.unshift(newField)
     saveToStorage()
-  }
 
-  function updateField(id: string, updated: Partial<Field>) {
-    const idx = fields.value.findIndex((f) => f.id === id)
-    if (idx !== -1) {
-      fields.value[idx] = { ...fields.value[idx], ...updated }
-      saveToStorage()
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('fields').insert({
+        id: newId,
+        name: fieldData.name,
+        owner: fieldData.owner,
+        crop_type: fieldData.cropType,
+        soil_type: fieldData.soilType,
+        growth_stage: fieldData.growthStage,
+        area_ha: fieldData.areaHa,
+        coordinates: fieldData.coordinates,
+        center: fieldData.center,
+        last_irrigated: fieldData.lastIrrigated,
+        notes: fieldData.notes,
+      })
     }
   }
 
-  function deleteField(id: string) {
+  async function deleteField(id: string) {
     fields.value = fields.value.filter((f) => f.id !== id)
     schedules.value = schedules.value.filter((s) => s.fieldId !== id)
     saveToStorage()
+
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('fields').delete().eq('id', id)
+    }
   }
 
-  function addSchedule(scheduleData: Omit<IrrigationSchedule, 'id'>) {
+  async function addSchedule(scheduleData: Omit<IrrigationSchedule, 'id'>) {
+    const newId = 'sch-' + Date.now()
     const newSchedule: IrrigationSchedule = {
       ...scheduleData,
-      id: 'sch-' + Date.now(),
+      id: newId,
     }
     schedules.value.unshift(newSchedule)
     saveToStorage()
+
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('schedules').insert({
+        id: newId,
+        field_id: scheduleData.fieldId,
+        field_name: scheduleData.fieldName,
+        scheduled_date: scheduleData.scheduledDate,
+        water_volume_liters: scheduleData.waterVolumeLiters,
+        status: scheduleData.status,
+        notes: scheduleData.notes,
+      })
+    }
   }
 
-  function toggleScheduleStatus(id: string) {
+  async function toggleScheduleStatus(id: string) {
     const sch = schedules.value.find((s) => s.id === id)
     if (sch) {
       sch.status = sch.status === 'Selesai' ? 'Dijadwalkan' : 'Selesai'
       saveToStorage()
+
+      if (isSupabaseConfigured && supabase) {
+        await supabase.from('schedules').update({ status: sch.status }).eq('id', id)
+      }
     }
   }
 
@@ -226,6 +300,11 @@ export const useFieldStore = defineStore('fields', () => {
     totalWaterSupply.value = val
   }
 
+  // Auto sync on mount if Supabase configured
+  if (isSupabaseConfigured) {
+    syncWithSupabase()
+  }
+
   return {
     fields,
     schedules,
@@ -233,13 +312,14 @@ export const useFieldStore = defineStore('fields', () => {
     totalWaterSupply,
     weather,
     isLoadingWeather,
+    isSyncingSupabase,
     fieldRisks,
     totalAreaHa,
     highRiskCount,
     harveyScore,
     loadWeather,
+    syncWithSupabase,
     addField,
-    updateField,
     deleteField,
     addSchedule,
     toggleScheduleStatus,
