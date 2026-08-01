@@ -1,16 +1,16 @@
 <template>
-  <div class="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
-    <div ref="mapContainer" class="w-full h-full min-h-[400px]" :class="{ 'cursor-crosshair': isDrawingMode }"></div>
+  <div class="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800 bg-slate-100 dark:bg-slate-900" :class="{ 'cursor-crosshair': isDrawingMode }">
+    <div ref="mapContainer" class="w-full h-full min-h-[400px]"></div>
 
     <!-- Drawing & Map Control Overlay (Top Right) -->
     <div class="absolute top-3 right-3 z-[600] flex flex-wrap items-center gap-2">
-      <!-- Map Type Switcher Button (Satelit Earth vs Peta Jalan) -->
+      <!-- Map Type Switcher Button (Vektor Jalan vs Satelit) -->
       <button
         type="button"
         @click="toggleMapType"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/95 text-slate-800 border border-slate-200 font-bold text-xs shadow-md hover:bg-slate-100 dark:bg-slate-900/95 dark:text-slate-100 dark:border-slate-800 transition-colors"
       >
-        <span>{{ mapType === 'satellite' ? '🛰️ Mode Satelit (Earth)' : '🗺️ Mode Peta Vektor' }}</span>
+        <span>{{ mapType === 'vector' ? '🗺️ Mode Peta Vektor' : '🛰️ Mode Satelit' }}</span>
       </button>
 
       <!-- Toggle Drawing Mode -->
@@ -72,11 +72,11 @@
     </div>
 
     <!-- Live Drawing Indicator Chip (Bottom Left) -->
-    <div v-if="isDrawingMode" class="absolute bottom-3 left-3 z-[600] flex flex-col gap-1.5">
+    <div v-if="isDrawingMode || drawnPoints.length >= 3" class="absolute bottom-3 left-3 z-[600] flex flex-col gap-1.5">
       <div class="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 shadow-md text-xs font-semibold text-slate-800 dark:bg-slate-900/95 dark:text-slate-100 dark:border-slate-800 flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
         <span>
-          {{ drawnPoints.length }} Titik
+          {{ drawnPoints.length }} Titik Terpilih
           <template v-if="drawnPoints.length < 3"> (min {{ 3 - drawnPoints.length }} lagi)</template>
           <template v-else> (Luas: {{ calculatedAreaHa }} Ha)</template>
         </span>
@@ -127,14 +127,14 @@ let tileLayer: L.TileLayer | null = null
 
 const isDrawingMode = ref(false)
 const isLocating = ref(false)
-const mapType = ref<'satellite' | 'vector'>('satellite') // Default High-Res Satellite View!
+const mapType = ref<'vector' | 'satellite'>('vector')
 const drawnPoints = ref<Array<[number, number]>>([]) // [lat, lng]
 
 const TILE_URLS = {
-  // Google Satellite Hybrid High-Res imagery with street labels
-  satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-  // CartoDB Voyager clean street map
-  vector: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  // OpenStreetMap standard (100% rock solid tile provider, no white images)
+  vector: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  // Esri World Imagery Satellite map
+  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 }
 
 const calculatedAreaHa = computed(() => {
@@ -151,18 +151,27 @@ const calculatedAreaHa = computed(() => {
   }
 })
 
-function toggleMapType() {
+function setTileLayer(type: 'vector' | 'satellite') {
   if (!map) return
-  mapType.value = mapType.value === 'satellite' ? 'vector' : 'satellite'
-
   if (tileLayer) {
     map.removeLayer(tileLayer)
   }
 
-  tileLayer = L.tileLayer(TILE_URLS[mapType.value], {
-    attribution: mapType.value === 'satellite' ? '&copy; Google Maps Satellite' : '&copy; CARTO & OpenStreetMap',
-    maxZoom: 20,
+  const url = TILE_URLS[type]
+
+  tileLayer = L.tileLayer(url, {
+    attribution: type === 'vector' ? '&copy; OpenStreetMap contributors' : '&copy; Esri World Imagery',
+    maxZoom: 19,
   }).addTo(map)
+}
+
+function toggleMapType() {
+  mapType.value = mapType.value === 'vector' ? 'satellite' : 'vector'
+  setTileLayer(mapType.value)
+
+  nextTick(() => {
+    map?.invalidateSize()
+  })
 }
 
 function getRiskColor(score: number): string {
@@ -232,7 +241,7 @@ function updateDrawPreview() {
   // Dashed Polyline connecting vertices
   if (drawnPoints.value.length >= 2) {
     const polyline = L.polyline(drawnPoints.value, {
-      color: '#34d399',
+      color: '#059669',
       weight: 3,
       dashArray: '6, 4',
     })
@@ -240,7 +249,7 @@ function updateDrawPreview() {
 
     // Dashed closing polyline back to start point
     const closingPolyline = L.polyline([drawnPoints.value[drawnPoints.value.length - 1], drawnPoints.value[0]], {
-      color: '#34d399',
+      color: '#059669',
       weight: 2,
       dashArray: '4, 4',
       opacity: 0.7,
@@ -268,9 +277,13 @@ function handleMapClick(e: L.LeafletMouseEvent) {
 
 function toggleDrawingMode() {
   isDrawingMode.value = !isDrawingMode.value
-  if (!isDrawingMode.value) {
+  if (isDrawingMode.value) {
+    // If re-entering drawing mode, clear previous temporary preview
     clearDrawnShape()
   }
+  nextTick(() => {
+    if (map) map.invalidateSize()
+  })
 }
 
 function undoLastPoint() {
@@ -296,8 +309,9 @@ function finishDrawing() {
     areaHa: areaHa > 0 ? areaHa : 1.5,
   })
 
+  // Turn off active drawing mode but DO NOT delete preview shape yet!
+  // Keep preview shape on map until form modal is saved or closed.
   isDrawingMode.value = false
-  clearDrawnShape()
 }
 
 function locateUser() {
@@ -307,7 +321,7 @@ function locateUser() {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       const { latitude, longitude } = pos.coords
-      map?.flyTo([latitude, longitude], 16, { duration: 1.2 })
+      map?.flyTo([latitude, longitude], 15, { duration: 1.2 })
       isLocating.value = false
     },
     (err) => {
@@ -322,13 +336,10 @@ onMounted(() => {
   if (!mapContainer.value) return
 
   // Default Center Surabaya/Sidoarjo agriculture region
-  map = L.map(mapContainer.value).setView([-7.255, 112.765], 14)
+  map = L.map(mapContainer.value).setView([-7.255, 112.765], 13)
 
-  // Default Satellite Hybrid Layer (Google Earth high resolution!)
-  tileLayer = L.tileLayer(TILE_URLS.satellite, {
-    attribution: '&copy; Google Maps Satellite',
-    maxZoom: 20,
-  }).addTo(map)
+  // OpenStreetMap standard tile layer
+  setTileLayer('vector')
 
   polygonGroup = L.layerGroup().addTo(map)
   drawLayerGroup = L.layerGroup().addTo(map)
@@ -345,6 +356,8 @@ onMounted(() => {
 watch(
   () => [fieldStore.fields, fieldStore.fieldRisks],
   () => {
+    // When fields store is updated (e.g. form submitted), clear temporary preview shape & render permanent polygon!
+    clearDrawnShape()
     renderPolygons()
   },
   { deep: true }
