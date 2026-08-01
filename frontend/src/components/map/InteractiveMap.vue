@@ -4,6 +4,15 @@
 
     <!-- Drawing & Map Control Overlay (Top Right) -->
     <div class="absolute top-3 right-3 z-[600] flex flex-wrap items-center gap-2">
+      <!-- Map Type Switcher Button (Satelit Earth vs Peta Jalan) -->
+      <button
+        type="button"
+        @click="toggleMapType"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/95 text-slate-800 border border-slate-200 font-bold text-xs shadow-md hover:bg-slate-100 dark:bg-slate-900/95 dark:text-slate-100 dark:border-slate-800 transition-colors"
+      >
+        <span>{{ mapType === 'satellite' ? '🛰️ Mode Satelit (Earth)' : '🗺️ Mode Peta Vektor' }}</span>
+      </button>
+
       <!-- Toggle Drawing Mode -->
       <button
         type="button"
@@ -114,10 +123,19 @@ const mapContainer = ref<HTMLElement | null>(null)
 let map: L.Map | null = null
 let polygonGroup: L.LayerGroup | null = null
 let drawLayerGroup: L.LayerGroup | null = null
+let tileLayer: L.TileLayer | null = null
 
 const isDrawingMode = ref(false)
 const isLocating = ref(false)
+const mapType = ref<'satellite' | 'vector'>('satellite') // Default High-Res Satellite View!
 const drawnPoints = ref<Array<[number, number]>>([]) // [lat, lng]
+
+const TILE_URLS = {
+  // Google Satellite Hybrid High-Res imagery with street labels
+  satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+  // CartoDB Voyager clean street map
+  vector: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+}
 
 const calculatedAreaHa = computed(() => {
   if (drawnPoints.value.length < 3) return '0.00'
@@ -132,6 +150,20 @@ const calculatedAreaHa = computed(() => {
     return '0.00'
   }
 })
+
+function toggleMapType() {
+  if (!map) return
+  mapType.value = mapType.value === 'satellite' ? 'vector' : 'satellite'
+
+  if (tileLayer) {
+    map.removeLayer(tileLayer)
+  }
+
+  tileLayer = L.tileLayer(TILE_URLS[mapType.value], {
+    attribution: mapType.value === 'satellite' ? '&copy; Google Maps Satellite' : '&copy; CARTO & OpenStreetMap',
+    maxZoom: 20,
+  }).addTo(map)
+}
 
 function getRiskColor(score: number): string {
   if (score >= 75) return '#ef4444' // Red Critical
@@ -154,8 +186,8 @@ function renderPolygons() {
       const polygon = L.polygon(latLngs, {
         color: color,
         fillColor: color,
-        fillOpacity: 0.35,
-        weight: 2.5,
+        fillOpacity: 0.45,
+        weight: 3,
       })
 
       const popupContent = `
@@ -183,15 +215,15 @@ function updateDrawPreview() {
 
   if (drawnPoints.value.length === 0) return
 
-  // Render markers for vertices (first point has larger radius, exactly like original Harvey!)
+  // Render markers for vertices
   drawnPoints.value.forEach(([lat, lng], idx) => {
     const isFirst = idx === 0
     const marker = L.circleMarker([lat, lng], {
-      radius: isFirst ? 8 : 5,
-      color: '#15803d',
-      fillColor: isFirst ? '#15803d' : '#ffffff',
+      radius: isFirst ? 9 : 6,
+      color: '#ffffff',
+      fillColor: isFirst ? '#10b981' : '#059669',
       fillOpacity: 1,
-      weight: 2,
+      weight: 2.5,
     })
     marker.bindTooltip(`Titik ${idx + 1}`, { permanent: false, direction: 'top' })
     drawLayerGroup!.addLayer(marker)
@@ -200,18 +232,18 @@ function updateDrawPreview() {
   // Dashed Polyline connecting vertices
   if (drawnPoints.value.length >= 2) {
     const polyline = L.polyline(drawnPoints.value, {
-      color: '#22c55e',
-      weight: 2.5,
+      color: '#34d399',
+      weight: 3,
       dashArray: '6, 4',
     })
     drawLayerGroup.addLayer(polyline)
 
     // Dashed closing polyline back to start point
     const closingPolyline = L.polyline([drawnPoints.value[drawnPoints.value.length - 1], drawnPoints.value[0]], {
-      color: '#22c55e',
-      weight: 1.5,
+      color: '#34d399',
+      weight: 2,
       dashArray: '4, 4',
-      opacity: 0.6,
+      opacity: 0.7,
     })
     drawLayerGroup.addLayer(closingPolyline)
   }
@@ -219,10 +251,10 @@ function updateDrawPreview() {
   // Filled polygon if >= 3 points
   if (drawnPoints.value.length >= 3) {
     const polygon = L.polygon(drawnPoints.value, {
-      color: '#15803d',
-      fillColor: '#22c55e',
-      fillOpacity: 0.35,
-      weight: 2,
+      color: '#059669',
+      fillColor: '#10b981',
+      fillOpacity: 0.45,
+      weight: 2.5,
     })
     drawLayerGroup.addLayer(polygon)
   }
@@ -275,7 +307,7 @@ function locateUser() {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       const { latitude, longitude } = pos.coords
-      map?.flyTo([latitude, longitude], 15, { duration: 1.2 })
+      map?.flyTo([latitude, longitude], 16, { duration: 1.2 })
       isLocating.value = false
     },
     (err) => {
@@ -290,11 +322,12 @@ onMounted(() => {
   if (!mapContainer.value) return
 
   // Default Center Surabaya/Sidoarjo agriculture region
-  map = L.map(mapContainer.value).setView([-7.255, 112.765], 13)
+  map = L.map(mapContainer.value).setView([-7.255, 112.765], 14)
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a> & OpenStreetMap',
-    maxZoom: 19,
+  // Default Satellite Hybrid Layer (Google Earth high resolution!)
+  tileLayer = L.tileLayer(TILE_URLS.satellite, {
+    attribution: '&copy; Google Maps Satellite',
+    maxZoom: 20,
   }).addTo(map)
 
   polygonGroup = L.layerGroup().addTo(map)
