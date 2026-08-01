@@ -17,12 +17,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/20',
-        secondary: 'bg-sky-600 text-white hover:bg-sky-700 shadow-md shadow-sky-600/20',
+        default: 'bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-700/20',
+        secondary: 'bg-sky-600 text-white hover:bg-sky-700 border border-sky-700/20',
         outline: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800',
         ghost: 'hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100',
-        destructive: 'bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/20',
-        agri: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-600/25',
+        destructive: 'bg-red-600 text-white hover:bg-red-700 border border-red-700/20',
+        agri: 'bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-700/20',
       },
       size: {
         default: 'h-10 px-4 py-2',

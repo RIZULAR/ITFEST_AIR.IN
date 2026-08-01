@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 pb-12">
     <!-- Header Banner -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-800 via-teal-700 to-sky-800 p-6 md:p-8 text-white shadow-xl">
+    <div class="relative overflow-hidden rounded-2xl bg-slate-900 p-6 md:p-8 text-white shadow-md">
       <div class="relative z-10 max-w-3xl space-y-2">
         <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md">
           <Sparkles class="h-3.5 w-3.5 text-emerald-300" />
@@ -21,7 +21,7 @@
     <!-- Key Metrics Section -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <MetricCard
-        title="Skor Ketahanan Klaster (Harvey Score)"
+        title="Skor Ketahanan Klaster (air.in Score)"
         :value="fieldStore.harveyScore + ' / 100'"
         :subtext="fieldStore.harveyScore >= 60 ? 'Resiliensi Klaster Baik' : 'Klaster Rentan Kekeringan'"
         :icon="ShieldCheck"

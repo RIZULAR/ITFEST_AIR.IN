@@ -2,13 +2,13 @@
   <header class="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
     <div class="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
       <!-- Brand Logo -->
-      <router-link to="/" class="flex items-center gap-3 group">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-600/30 transition-transform group-hover:scale-105">
+      <router-link to="/dashboard" class="flex items-center gap-3 group">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm transition-transform group-hover:scale-105">
           <Droplets class="h-6 w-6" />
         </div>
         <div>
           <div class="flex items-center gap-1.5">
-            <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-700 via-teal-600 to-sky-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-sky-400">HARVEY</span>
+            <span class="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">air.in</span>
             <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">v2.0</span>
           </div>
           <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Smart Water Allocation Platform</p>
@@ -61,7 +61,7 @@ const route = useRoute()
 const fieldStore = useFieldStore()
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/fields', label: 'Manajemen Lahan', icon: MapPin },
   { to: '/allocation', label: 'Alokasi Air', icon: Scale },
   { to: '/schedule', label: 'Jadwal', icon: Calendar },

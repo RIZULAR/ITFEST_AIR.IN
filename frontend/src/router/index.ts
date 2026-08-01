@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import LandingPage from '../views/LandingPage.vue'
 import DashboardPage from '../views/DashboardPage.vue'
 import FieldsPage from '../views/FieldsPage.vue'
 import WaterAllocationPage from '../views/WaterAllocationPage.vue'
@@ -7,6 +8,11 @@ import SchedulePage from '../views/SchedulePage.vue'
 const routes = [
   {
     path: '/',
+    name: 'Landing',
+    component: LandingPage,
+  },
+  {
+    path: '/dashboard',
     name: 'Dashboard',
     component: DashboardPage,
   },
