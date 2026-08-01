@@ -132,8 +132,8 @@
     <!-- Map & Priority Allocation Ranking Grid -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Interactive Leaflet Map Preview -->
-      <Card class="p-5 lg:col-span-2 flex flex-col justify-between">
-        <div class="flex items-center justify-between mb-4">
+      <Card class="p-5 lg:col-span-2 flex flex-col space-y-4">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <MapPin class="h-5 w-5" />
@@ -150,13 +150,13 @@
           </router-link>
         </div>
 
-        <div class="w-full h-[360px] rounded-xl overflow-hidden">
+        <div class="w-full h-[420px] rounded-xl overflow-hidden">
           <InteractiveMap />
         </div>
       </Card>
 
       <!-- Priority Water Allocation List -->
-      <Card class="p-5 flex flex-col justify-between">
+      <Card class="p-5 flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
@@ -202,7 +202,7 @@
           </div>
         </div>
 
-        <div class="mt-4 pt-3">
+        <div class="pt-3">
           <router-link to="/allocation" class="w-full block">
             <Button variant="agri" class="w-full">
               Lihat Detail Alokasi Air &rarr;

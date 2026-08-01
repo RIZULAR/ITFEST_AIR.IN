@@ -1,6 +1,6 @@
 <template>
-  <div class="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
-    <div ref="mapContainer" class="w-full h-full min-h-[400px]"></div>
+  <div class="relative w-full h-full min-h-[350px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
+    <div ref="mapContainer" class="w-full h-full min-h-[350px]"></div>
 
     <!-- Map Legend Overlay -->
     <div class="absolute bottom-4 right-4 z-[500] bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-200 shadow-lg text-xs dark:bg-slate-900/90 dark:border-slate-800">
@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import L from 'leaflet'
 import { useFieldStore } from '../../stores/fieldStore'
 
@@ -94,6 +94,10 @@ onMounted(() => {
 
   polygonGroup = L.layerGroup().addTo(map)
   renderPolygons()
+
+  nextTick(() => {
+    if (map) map.invalidateSize()
+  })
 })
 
 watch(
