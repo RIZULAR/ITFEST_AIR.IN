@@ -7,8 +7,8 @@
         <p class="text-sm text-slate-500">Distribusi kuota air secara adil berdasarkan skor kelangkaan, jenis tanah, &amp; El Niño simulator.</p>
       </div>
 
-      <Button variant="agri" @click="shareToWhatsApp">
-        <MessageSquare class="h-4 w-4 mr-2" />
+      <Button variant="agri" @click="shareToWhatsApp" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+        <i class="fa-brands fa-whatsapp text-lg mr-2"></i>
         Kirim Rekomendasi via WhatsApp
       </Button>
     </div>
@@ -139,7 +139,7 @@ import { formatLiters } from '../lib/utils'
 import Button from '../components/ui/Button.vue'
 import Card from '../components/ui/Card.vue'
 import Badge from '../components/ui/Badge.vue'
-import { Flame, Droplets, MessageSquare } from '@lucide/vue'
+import { Flame, Droplets } from '@lucide/vue'
 
 const fieldStore = useFieldStore()
 
