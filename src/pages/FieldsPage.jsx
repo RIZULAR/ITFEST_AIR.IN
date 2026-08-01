@@ -1,14 +1,14 @@
 /** @format */
 
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import {
 	CircleMarker,
 	MapContainer,
 	Polygon,
 	TileLayer,
+	useMap,
 } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 
@@ -46,6 +46,72 @@ import { updateField } from '../services/fieldStore.js';
 import { getGrowthStage } from '../utils/growthUtils';
 
 export { getGrowthStage };
+
+function MapAutoBounds({ points, center }) {
+	const map = useMap();
+	useEffect(() => {
+		if (points && points.length >= 3) {
+			try {
+				const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng]));
+				if (bounds.isValid()) {
+					map.fitBounds(bounds, { padding: [15, 15], animate: false });
+				}
+			} catch (err) {
+				console.warn('fitBounds error:', err);
+			}
+		} else if (center) {
+			map.setView(center, 13, { animate: false });
+		}
+	}, [points, center, map]);
+	return null;
+}
+
+function PolygonMapPreview({ field }) {
+	const pts = (field.polygonPoints || [])
+		.map((p) => ({
+			lat: Number(p.lat ?? p[0]),
+			lng: Number(p.lng ?? p.lon ?? p[1]),
+		}))
+		.filter((p) => !isNaN(p.lat) && !isNaN(p.lng));
+
+	const centerLat = field.lat ?? (pts[0]?.lat ?? -7.4478);
+	const centerLng = field.lng ?? field.lon ?? (pts[0]?.lng ?? 112.7183);
+
+	return (
+		<MapContainer
+			center={[centerLat, centerLng]}
+			zoom={12}
+			style={{ width: "100%", height: "100%" }}
+			zoomControl={false}
+			dragging={false}
+			scrollWheelZoom={false}
+		>
+			<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+			<MapAutoBounds points={pts} center={[centerLat, centerLng]} />
+			{pts.length >= 3 ? (
+				<Polygon
+					positions={pts}
+					pathOptions={{
+						color: "#2e7d32",
+						fillColor: "#4caf50",
+						fillOpacity: 0.45,
+						weight: 3,
+					}}
+				/>
+			) : (
+				<CircleMarker
+					center={[centerLat, centerLng]}
+					radius={8}
+					pathOptions={{
+						color: "#2e7d32",
+						fillColor: "#2e7d32",
+						fillOpacity: 0.8,
+					}}
+				/>
+			)}
+		</MapContainer>
+	);
+}
 
 export function FieldsPage({ fields, onDelete, onUpdate }) {
 	const [editField, setEditField] = useState(null);
@@ -128,7 +194,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 					startIcon={<MapAltIcon />}
 					sx={{ width: { xs: "100%", sm: "auto" } }}
 				>
-					Tambah Lahan
+					Tambah Lahan di Peta
 				</Button>
 			</Box>
 
@@ -146,7 +212,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 					<Box sx={{ p: 6, textAlign: "center" }}>
 						<MapAltIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
 						<Typography color="text.secondary">Belum ada lahan.</Typography>
-						<Button component={Link} to="/" variant="outlined" sx={{ mt: 2 }}>
+						<Button component={Link} to="/dashboard/map" variant="outlined" sx={{ mt: 2 }}>
 							Buat di Peta
 						</Button>
 					</Box>
@@ -165,7 +231,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 							>
 								<Box sx={{ width: 32 }} />
 								{[
-									"Nama",
+									"Nama Lahan",
 									"Luas",
 									"Suhu",
 									"Humid",
@@ -211,7 +277,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 												"&:hover": {
 													bgcolor: isExpanded
 														? "rgba(45,106,79,0.06)"
-														: "rgba(255,255,255,0.02)",
+														: "rgba(0,0,0,0.02)",
 												},
 												"&:last-child": {
 													borderBottom: isExpanded ? "1px solid" : "none",
@@ -295,7 +361,7 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 											</IconButton>
 										</Stack>
 
-										<Collapse in={isExpanded} timeout="auto">
+										<Collapse in={isExpanded} timeout="auto" mountOnEnter unmountOnExit={false}>
 											<Box
 												sx={{
 													display: { xs: "block", md: "flex" },
@@ -306,42 +372,21 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 													bgcolor: "rgba(0,0,0,0.01)",
 												}}
 											>
+												{/* Mini Map Preview with Drawn Polygon */}
 												<Box
 													sx={{
-														width: { xs: "100%", md: 220 },
-														height: { xs: 140, md: 160 },
-														borderRadius: 1,
+														width: { xs: "100%", md: 260 },
+														height: { xs: 180, md: 200 },
+														borderRadius: 1.5,
 														overflow: "hidden",
 														flexShrink: 0,
 														bgcolor: "grey.100",
 														mb: { xs: 1, md: 0 },
+														border: "1px solid",
+														borderColor: "divider",
 													}}
 												>
-													<MapContainer
-														center={[f.lat ?? -6.2, f.lon ?? 106.8]}
-														zoom={14}
-														style={{ width: "100%", height: "100%" }}
-														zoomControl={false}
-														dragging={false}
-														scrollWheelZoom={false}
-													>
-														<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-														{f.polygonPoints?.length > 2 ? (
-															<Polygon
-																positions={f.polygonPoints}
-																color="#2e7d32"
-															/>
-														) : (
-															<CircleMarker
-																center={[f.lat, f.lon]}
-																radius={8}
-																pathOptions={{
-																	color: "#2e7d32",
-																	fillColor: "#2e7d32",
-																}}
-															/>
-														)}
-													</MapContainer>
+													<PolygonMapPreview field={f} />
 												</Box>
 												<Box
 													sx={{
@@ -362,10 +407,10 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 													/>
 													<StatRow
 														icon={<LocationOnIcon sx={{ fontSize: 13 }} />}
-														label="Koordinat"
+														label="Koordinat Pusar"
 														value={
 															f.lat != null
-																? `${f.lat?.toFixed(4)}, ${f.lon?.toFixed(4)}`
+																? `${Number(f.lat).toFixed(4)}, ${Number(f.lng ?? f.lon).toFixed(4)}`
 																: "—"
 														}
 													/>
@@ -420,16 +465,6 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 															value={f.elevation}
 															unit=" m"
 														/>
-													)}
-													{f.description && (
-														<Box sx={{ gridColumn: "1/-1" }}>
-															<Typography
-																variant="caption"
-																color="text.secondary"
-															>
-																{f.description}
-															</Typography>
-														</Box>
 													)}
 												</Box>
 											</Box>
