@@ -371,42 +371,42 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <!-- Vue 3 -->
           <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col items-center justify-center space-y-3 hover:border-emerald-500/20 transition-all duration-300">
-            <div class="h-10 w-10 text-emerald-600 flex items-center justify-center font-bold text-2xl bg-emerald-50 rounded-lg border border-emerald-200/30">V</div>
+            <svg class="h-10 w-10" viewBox="0 0 256 221" version="1.1" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#41B883" d="M204.8 0H256L128 220.8L0 0h97.92L128 51.2L157.44 0h47.36Z"/><path fill="#35495E" d="M0 0h97.92L128 51.2L157.44 0h47.36L128 107.52L0 0Z"/></svg>
             <span class="text-sm font-bold text-slate-800">Vue 3</span>
             <span class="text-[10px] text-slate-400">Framework Reaktif</span>
           </div>
 
           <!-- Pinia -->
           <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col items-center justify-center space-y-3 hover:border-emerald-500/20 transition-all duration-300">
-            <div class="h-10 w-10 text-amber-600 flex items-center justify-center font-bold text-2xl bg-amber-50 rounded-lg border border-amber-200/30">P</div>
+            <svg class="h-10 w-10" viewBox="0 0 256 313" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="#FFE56C" d="M128 313c63.7 0 102-42.5 102-108.8 0-77.9-52.6-118-102-118S26 126.3 26 204.2C26 270.5 64.3 313 128 313z"/><path fill="#FAD126" d="M128 313c32 0 68-15 88-58-15 15-46 22-88 22s-73-7-88-22c20 43 56 58 88 58z"/><path fill="#3AA675" d="M128 86c0-20-10-48-26-68 0 0 18 16 26 40 8-24 26-40 26-40-16 20-26 48-26 68z"/></svg>
             <span class="text-sm font-bold text-slate-800">Pinia Store</span>
             <span class="text-[10px] text-slate-400">Manajemen State</span>
           </div>
 
           <!-- Tailwind CSS -->
           <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col items-center justify-center space-y-3 hover:border-emerald-500/20 transition-all duration-300">
-            <div class="h-10 w-10 text-sky-600 flex items-center justify-center font-bold text-2xl bg-sky-50 rounded-lg border border-sky-200/30">T</div>
+            <svg class="h-10 w-10" viewBox="0 0 256 154" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="#38BDF8" d="M128 0C93.1 0 71.3 17.5 62.5 52.5c13.1-17.5 28.4-24 45.9-19.7 10 2.5 17.2 9.8 25.1 17.9 12.9 13.1 27.8 28.3 58.5 28.3 34.9 0 56.7-17.5 65.5-52.5-13.1 17.5-28.4 24-45.9 19.7-10-2.5-17.2-9.8-25.1-17.9C173.6 15.2 158.7 0 128 0zm-96 77C14.3 77 1.8 84.8 0 119c13.1-17.5 28.4-24 45.9-19.7 10 2.5 17.2 9.8 25.1 17.9 12.9 13.1 27.8 28.3 58.5 28.3 34.9 0 56.7-17.5 65.5-52.5-13.1 17.5-28.4 24-45.9 19.7-10-2.5-17.2-9.8-25.1-17.9C111.1 92.2 96.2 77 65.5 77z"/></svg>
             <span class="text-sm font-bold text-slate-800">Tailwind CSS</span>
             <span class="text-[10px] text-slate-400">Desain Utility-First</span>
           </div>
 
           <!-- Leaflet GIS -->
           <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col items-center justify-center space-y-3 hover:border-emerald-500/20 transition-all duration-300">
-            <div class="h-10 w-10 text-green-600 flex items-center justify-center font-bold text-2xl bg-green-50 rounded-lg border border-green-200/30">L</div>
+            <svg class="h-10 w-10" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path fill="#B5DE7E" d="M128 0C78.4 0 0 51.5 0 140c0 52 41 116 128 116 87 0 128-64 128-116C256 51.5 177.6 0 128 0z"/><path fill="#7FB83C" d="M128 256c71.2 0 113.8-52.5 125.8-98-15.8 45.5-62 76.5-125.8 76.5S18 203.5 2.2 158c12 45.5 54.6 98 125.8 98z"/><path fill="#FFFFFF" d="M117 38c11-9 24.5-16.5 38.5-21C122.5 29.5 99 64.5 99 105c0 58.5 44.5 106 99 106 10.5 0 20.5-2 30-5.5C201.5 222.5 166.5 238 128 238c-66.5 0-110-53-110-119C18 53 78.5 38 117 38z"/></svg>
             <span class="text-sm font-bold text-slate-800">Leaflet Maps</span>
             <span class="text-[10px] text-slate-400">Pemetaan Spasial</span>
           </div>
 
           <!-- Turf.js -->
           <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col items-center justify-center space-y-3 hover:border-emerald-500/20 transition-all duration-300">
-            <div class="h-10 w-10 text-purple-600 flex items-center justify-center font-bold text-2xl bg-purple-50 rounded-lg border border-purple-200/30">T</div>
+            <svg class="h-10 w-10" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><polygon points="128,18 223,73 223,183 128,238 33,183 33,73" fill="#2ECC71"/><polygon points="128,38 206,83 206,173 128,218 50,173 50,83" fill="#27AE60"/><circle cx="128" cy="128" r="30" fill="#FFFFFF"/><line x1="128" y1="38" x2="128" y2="98" stroke="#FFFFFF" stroke-width="6"/><line x1="50" y1="173" x2="102" y2="143" stroke="#FFFFFF" stroke-width="6"/><line x1="206" y1="173" x2="154" y2="143" stroke="#FFFFFF" stroke-width="6"/></svg>
             <span class="text-sm font-bold text-slate-800">Turf.js</span>
             <span class="text-[10px] text-slate-400">Analisis Geospasial</span>
           </div>
 
           <!-- Supabase -->
           <div class="rounded-xl border border-slate-200 bg-white p-5 flex flex-col items-center justify-center space-y-3 hover:border-emerald-500/20 transition-all duration-300">
-            <div class="h-10 w-10 text-emerald-500 flex items-center justify-center font-bold text-2xl bg-emerald-50 rounded-lg border border-emerald-200/30">S</div>
+            <svg class="h-10 w-10" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path fill="#3ECF8E" d="M141.5 0l-102 121.7c-3.1 3.7-.4 9.3 4.5 9.3h80l-28.5 125c-1.3 5.7 6.1 9.4 9.9 4.9l102-121.7c3.1-3.7.4-9.3-4.5-9.3h-80l28.5-125c1.3-5.7-6.1-9.4-9.9-4.9z"/></svg>
             <span class="text-sm font-bold text-slate-800">Supabase</span>
             <span class="text-[10px] text-slate-400">Cloud Database</span>
           </div>
