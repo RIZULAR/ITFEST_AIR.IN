@@ -1,60 +1,81 @@
 <template>
-  <div class="relative w-full h-full min-h-[380px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
-    <div ref="mapContainer" class="w-full h-full min-h-[380px]" :class="{ 'cursor-crosshair': isDrawingMode }"></div>
+  <div class="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
+    <div ref="mapContainer" class="w-full h-full min-h-[400px]" :class="{ 'cursor-crosshair': isDrawingMode }"></div>
 
-    <!-- Drawing Controls Overlay (Top Left) -->
-    <div class="absolute top-4 left-4 z-[500] flex flex-col gap-2">
+    <!-- Drawing & Map Control Overlay (Top Right) -->
+    <div class="absolute top-3 right-3 z-[600] flex flex-wrap items-center gap-2">
+      <!-- Toggle Drawing Mode -->
       <button
         type="button"
         @click="toggleDrawingMode"
         :class="[
-          'flex items-center gap-2 px-3.5 py-2 rounded-lg font-bold text-xs shadow-md transition-all backdrop-blur-md border',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition-all backdrop-blur-md border',
           isDrawingMode
-            ? 'bg-rose-600 text-white border-rose-500 hover:bg-rose-700 animate-pulse'
-            : 'bg-white/90 text-slate-800 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-900/90 dark:text-slate-100 dark:border-slate-800'
+            ? 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700'
+            : 'bg-white/95 text-slate-800 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-900/95 dark:text-slate-100 dark:border-slate-800'
         ]"
       >
-        <span v-if="!isDrawingMode">✏️ Gambar Poligon Lahan Baru</span>
-        <span v-else>✖️ Batal Menggambar</span>
+        <span>✏️ {{ isDrawingMode ? 'Mode Gambar Aktif' : 'Gambar Poligon' }}</span>
       </button>
 
-      <!-- Drawing Stats Bar (When Active) -->
-      <div
-        v-if="isDrawingMode"
-        class="bg-white/95 backdrop-blur-md p-3 rounded-lg border border-emerald-500/30 shadow-lg text-xs space-y-2 dark:bg-slate-900/95 dark:border-emerald-500/40 max-w-xs"
-      >
-        <div class="flex items-center justify-between text-slate-700 dark:text-slate-200">
-          <span>📍 Jumlah Titik:</span>
-          <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ drawnPoints.length }} Titik</span>
-        </div>
-        <div class="flex items-center justify-between text-slate-700 dark:text-slate-200">
-          <span>📐 Luas Area:</span>
-          <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ calculatedAreaHa }} Ha</span>
-        </div>
-        <p class="text-[11px] text-slate-500 leading-tight">Klik pada peta untuk menambah sudut poligon (min 3 titik).</p>
+      <template v-if="isDrawingMode">
+        <!-- Undo Button -->
+        <button
+          type="button"
+          @click="undoLastPoint"
+          :disabled="drawnPoints.length === 0"
+          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/95 text-slate-700 border border-slate-200 font-semibold text-xs shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-slate-900/95 dark:text-slate-200 dark:border-slate-800"
+        >
+          ↩️ Undo
+        </button>
 
-        <div class="flex items-center gap-2 pt-1">
-          <button
-            type="button"
-            @click="clearDrawnShape"
-            class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
-          >
-            Reset
-          </button>
-          <button
-            type="button"
-            :disabled="drawnPoints.length < 3"
-            @click="finishDrawing"
-            class="flex-1 px-3 py-1 rounded bg-emerald-600 text-white font-bold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-          >
-            Simpan Lahan Ini &rarr;
-          </button>
-        </div>
+        <!-- Clear Button -->
+        <button
+          type="button"
+          @click="clearDrawnShape"
+          :disabled="drawnPoints.length === 0"
+          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/95 text-slate-700 border border-slate-200 font-semibold text-xs shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-slate-900/95 dark:text-slate-200 dark:border-slate-800"
+        >
+          🧹 Clear
+        </button>
+
+        <!-- Finish Button -->
+        <button
+          type="button"
+          @click="finishDrawing"
+          :disabled="drawnPoints.length < 3"
+          class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-sm hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ✅ Finish
+        </button>
+      </template>
+
+      <!-- Locate Me Button -->
+      <button
+        type="button"
+        @click="locateUser"
+        :disabled="isLocating"
+        class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/95 text-slate-800 border border-slate-200 font-bold text-xs shadow-md hover:bg-slate-100 disabled:opacity-50 dark:bg-slate-900/95 dark:text-slate-100 dark:border-slate-800"
+      >
+        <span v-if="!isLocating">📍 Lokasi Saya</span>
+        <span v-else class="animate-spin">🌀</span>
+      </button>
+    </div>
+
+    <!-- Live Drawing Indicator Chip (Bottom Left) -->
+    <div v-if="isDrawingMode" class="absolute bottom-3 left-3 z-[600] flex flex-col gap-1.5">
+      <div class="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 shadow-md text-xs font-semibold text-slate-800 dark:bg-slate-900/95 dark:text-slate-100 dark:border-slate-800 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>
+          {{ drawnPoints.length }} Titik
+          <template v-if="drawnPoints.length < 3"> (min {{ 3 - drawnPoints.length }} lagi)</template>
+          <template v-else> (Luas: {{ calculatedAreaHa }} Ha)</template>
+        </span>
       </div>
     </div>
 
     <!-- Map Legend Overlay (Bottom Right) -->
-    <div class="absolute bottom-4 right-4 z-[500] bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-200 shadow-lg text-xs dark:bg-slate-900/90 dark:border-slate-800">
+    <div class="absolute bottom-3 right-3 z-[500] bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-200 shadow-lg text-xs dark:bg-slate-900/90 dark:border-slate-800">
       <div class="font-semibold text-slate-800 dark:text-slate-200 mb-1">Tingkat Risiko Irigasi</div>
       <div class="space-y-1">
         <div class="flex items-center gap-2">
@@ -95,12 +116,12 @@ let polygonGroup: L.LayerGroup | null = null
 let drawLayerGroup: L.LayerGroup | null = null
 
 const isDrawingMode = ref(false)
+const isLocating = ref(false)
 const drawnPoints = ref<Array<[number, number]>>([]) // [lat, lng]
 
 const calculatedAreaHa = computed(() => {
   if (drawnPoints.value.length < 3) return '0.00'
   try {
-    // Turf uses [longitude, latitude] format
     const coordinates = [...drawnPoints.value.map(([lat, lng]) => [lng, lat])]
     coordinates.push(coordinates[0]) // Close polygon ring
     const polygonFeature = turf.polygon([coordinates])
@@ -133,7 +154,7 @@ function renderPolygons() {
       const polygon = L.polygon(latLngs, {
         color: color,
         fillColor: color,
-        fillOpacity: 0.45,
+        fillOpacity: 0.35,
         weight: 2.5,
       })
 
@@ -145,7 +166,7 @@ function renderPolygons() {
           <p style="margin: 2px 0; font-size: 12px; color: #475569;">📐 <b>Luas:</b> ${field.areaHa} Ha</p>
           <p style="margin: 2px 0; font-size: 12px; color: #475569;">🌱 <b>Fase:</b> ${field.growthStage}</p>
           <div style="margin-top: 8px; padding: 4px 8px; background: ${color}20; border-radius: 6px; border: 1px solid ${color}; display: inline-block;">
-            <span style="font-weight: 700; font-size: 12px; color: ${color};">Risko: ${score}/100 (${risk?.riskLevel || 'Sedang'})</span>
+            <span style="font-weight: 700; font-size: 12px; color: ${color};">Risiko: ${score}/100 (${risk?.riskLevel || 'Sedang'})</span>
           </div>
         </div>
       `
@@ -162,12 +183,13 @@ function updateDrawPreview() {
 
   if (drawnPoints.value.length === 0) return
 
-  // Render markers for vertices
+  // Render markers for vertices (first point has larger radius, exactly like original Harvey!)
   drawnPoints.value.forEach(([lat, lng], idx) => {
+    const isFirst = idx === 0
     const marker = L.circleMarker([lat, lng], {
-      radius: 6,
-      color: '#059669',
-      fillColor: '#10b981',
+      radius: isFirst ? 8 : 5,
+      color: '#15803d',
+      fillColor: isFirst ? '#15803d' : '#ffffff',
       fillOpacity: 1,
       weight: 2,
     })
@@ -175,20 +197,32 @@ function updateDrawPreview() {
     drawLayerGroup!.addLayer(marker)
   })
 
-  // Render polyline / polygon
-  if (drawnPoints.value.length === 2) {
+  // Dashed Polyline connecting vertices
+  if (drawnPoints.value.length >= 2) {
     const polyline = L.polyline(drawnPoints.value, {
-      color: '#059669',
-      weight: 3,
-      dashArray: '5, 5',
+      color: '#22c55e',
+      weight: 2.5,
+      dashArray: '6, 4',
     })
     drawLayerGroup.addLayer(polyline)
-  } else if (drawnPoints.value.length >= 3) {
+
+    // Dashed closing polyline back to start point
+    const closingPolyline = L.polyline([drawnPoints.value[drawnPoints.value.length - 1], drawnPoints.value[0]], {
+      color: '#22c55e',
+      weight: 1.5,
+      dashArray: '4, 4',
+      opacity: 0.6,
+    })
+    drawLayerGroup.addLayer(closingPolyline)
+  }
+
+  // Filled polygon if >= 3 points
+  if (drawnPoints.value.length >= 3) {
     const polygon = L.polygon(drawnPoints.value, {
-      color: '#059669',
-      fillColor: '#34d399',
-      fillOpacity: 0.5,
-      weight: 3,
+      color: '#15803d',
+      fillColor: '#22c55e',
+      fillOpacity: 0.35,
+      weight: 2,
     })
     drawLayerGroup.addLayer(polygon)
   }
@@ -204,6 +238,13 @@ function toggleDrawingMode() {
   isDrawingMode.value = !isDrawingMode.value
   if (!isDrawingMode.value) {
     clearDrawnShape()
+  }
+}
+
+function undoLastPoint() {
+  if (drawnPoints.value.length > 0) {
+    drawnPoints.value.pop()
+    updateDrawPreview()
   }
 }
 
@@ -225,6 +266,24 @@ function finishDrawing() {
 
   isDrawingMode.value = false
   clearDrawnShape()
+}
+
+function locateUser() {
+  if (!map || !navigator.geolocation) return
+  isLocating.value = true
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords
+      map?.flyTo([latitude, longitude], 15, { duration: 1.2 })
+      isLocating.value = false
+    },
+    (err) => {
+      console.warn('Location error:', err)
+      isLocating.value = false
+    },
+    { enableHighAccuracy: true, timeout: 5000 }
+  )
 }
 
 onMounted(() => {
