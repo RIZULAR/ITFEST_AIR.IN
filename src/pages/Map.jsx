@@ -736,7 +736,11 @@ export default function Map() {
 								zoom={zoom}
 								style={{ height: 560, width: "100%" }}
 							>
-								<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+								<TileLayer
+									url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+									maxZoom={19}
+									attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+								/>
 								<MapUpdater center={center} zoom={zoom} />
 								<MapClicker
 									onClick={(latlng) => setDrawPoints((p) => [...p, latlng])}

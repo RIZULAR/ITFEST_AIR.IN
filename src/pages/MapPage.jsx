@@ -137,7 +137,11 @@ export default function MapPage({ fields, onFieldCreate }) {
                     zoom={zoom}
                     style={{ height: '100%', width: '100%' }}
                 >
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        maxZoom={19}
+                        attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+                    />
                     <MapUpdater center={center} zoom={zoom} />
                     <MapClicker onClick={pt => setDrawPoints(p => [...p, pt])} />
 

@@ -86,7 +86,11 @@ function PolygonMapPreview({ field }) {
 			dragging={false}
 			scrollWheelZoom={false}
 		>
-			<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+			<TileLayer
+				url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+				maxZoom={19}
+				attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+			/>
 			<MapAutoBounds points={pts} center={[centerLat, centerLng]} />
 			{pts.length >= 3 ? (
 				<Polygon
