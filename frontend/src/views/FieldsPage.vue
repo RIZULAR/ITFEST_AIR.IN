@@ -13,17 +13,17 @@
       </Button>
     </div>
 
-    <!-- Map Full Width View -->
+    <!-- Map Full Width View with Interactive Polygon Drawing -->
     <Card class="p-5 space-y-3">
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <MapPin class="h-5 w-5 text-emerald-600" />
-          Peta Persebaran Poligon Lahan
+          Peta Persebaran &amp; Editor Poligon Lahan
         </h3>
-        <span class="text-xs text-slate-500">{{ fieldStore.fields.length }} Lahan Terdaftar</span>
+        <span class="text-xs text-slate-500 font-semibold">{{ fieldStore.fields.length }} Lahan Terdaftar</span>
       </div>
-      <div class="w-full h-[400px]">
-        <InteractiveMap />
+      <div class="w-full h-[450px]">
+        <InteractiveMap @polygonCreated="handlePolygonCreated" />
       </div>
     </Card>
 
@@ -42,7 +42,7 @@
               <th class="px-5 py-3.5">Pemilik</th>
               <th class="px-5 py-3.5">Jenis Tanaman</th>
               <th class="px-5 py-3.5">Tipe Tanah</th>
-              <th class="px-5 py-3.5">Fase Tumit</th>
+              <th class="px-5 py-3.5">Fase Tumbuh</th>
               <th class="px-5 py-3.5">Luas (Ha)</th>
               <th class="px-5 py-3.5">Skor Risiko</th>
               <th class="px-5 py-3.5 text-right">Aksi</th>
@@ -65,11 +65,9 @@
               </td>
               <td class="px-5 py-4 font-semibold text-slate-800 dark:text-slate-200">{{ field.areaHa }} Ha</td>
               <td class="px-5 py-4">
-                <template v-with="getRisk(field.id)">
-                  <Badge :variant="getRisk(field.id)?.riskLevel === 'Kritis' ? 'danger' : getRisk(field.id)?.riskLevel === 'Tinggi' ? 'warning' : 'default'">
-                    {{ getRisk(field.id)?.riskScore }}/100 ({{ getRisk(field.id)?.riskLevel }})
-                  </Badge>
-                </template>
+                <Badge :variant="getRisk(field.id)?.riskLevel === 'Kritis' ? 'danger' : getRisk(field.id)?.riskLevel === 'Tinggi' ? 'warning' : 'default'">
+                  {{ getRisk(field.id)?.riskScore }}/100 ({{ getRisk(field.id)?.riskLevel }})
+                </Badge>
               </td>
               <td class="px-5 py-4 text-right">
                 <Button variant="ghost" size="sm" class="text-rose-600 hover:text-rose-700 hover:bg-rose-50" @click="fieldStore.deleteField(field.id)">
@@ -86,7 +84,12 @@
     <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
       <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl space-y-4 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
         <div class="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Tambah Lahan Baru</h3>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Tambah Lahan Baru</h3>
+            <p v-if="drawnCoordinates" class="text-xs text-emerald-600 font-semibold mt-0.5">
+              ✓ Koordinat &amp; Luas Poligon dari Peta Telah Terisi Otomatis
+            </p>
+          </div>
           <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-600">
             <X class="h-5 w-5" />
           </button>
@@ -134,7 +137,7 @@
 
           <div>
             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Luas Lahan (Hektar)</label>
-            <input v-model.number="form.areaHa" required type="number" step="0.1" min="0.1" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+            <input v-model.number="form.areaHa" required type="number" step="0.01" min="0.01" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
           </div>
 
           <div class="pt-3 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
@@ -160,6 +163,7 @@ import { MapPin, Plus, Trash2, X } from '@lucide/vue'
 
 const fieldStore = useFieldStore()
 const showAddModal = ref(false)
+const drawnCoordinates = ref<Array<{ lat: number; lng: number }> | null>(null)
 
 const form = ref({
   name: '',
@@ -174,19 +178,30 @@ function getRisk(fieldId: string) {
   return fieldStore.fieldRisks.find((r) => r.fieldId === fieldId)
 }
 
+function handlePolygonCreated(data: { coordinates: Array<{ lat: number; lng: number }>; areaHa: number }) {
+  drawnCoordinates.value = data.coordinates
+  form.value.areaHa = data.areaHa
+  showAddModal.value = true
+}
+
 function handleAddSubmit() {
+  const coords = drawnCoordinates.value || [
+    { lat: -7.250 + (Math.random() - 0.5) * 0.02, lng: 112.760 + (Math.random() - 0.5) * 0.02 },
+    { lat: -7.253 + (Math.random() - 0.5) * 0.02, lng: 112.763 + (Math.random() - 0.5) * 0.02 },
+    { lat: -7.256 + (Math.random() - 0.5) * 0.02, lng: 112.759 + (Math.random() - 0.5) * 0.02 },
+  ]
+  const centerLat = coords.reduce((acc, c) => acc + c.lat, 0) / coords.length
+  const centerLng = coords.reduce((acc, c) => acc + c.lng, 0) / coords.length
+
   fieldStore.addField({
     ...form.value,
-    coordinates: [
-      { lat: -7.250 + (Math.random() - 0.5) * 0.02, lng: 112.760 + (Math.random() - 0.5) * 0.02 },
-      { lat: -7.253 + (Math.random() - 0.5) * 0.02, lng: 112.763 + (Math.random() - 0.5) * 0.02 },
-      { lat: -7.256 + (Math.random() - 0.5) * 0.02, lng: 112.759 + (Math.random() - 0.5) * 0.02 },
-    ],
-    center: { lat: -7.253, lng: 112.761 },
+    coordinates: coords,
+    center: { lat: centerLat, lng: centerLng },
     lastIrrigated: new Date().toISOString().split('T')[0],
   })
 
   showAddModal.value = false
+  drawnCoordinates.value = null
   form.value = {
     name: '',
     owner: '',

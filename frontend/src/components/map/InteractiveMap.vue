@@ -1,8 +1,59 @@
 <template>
-  <div class="relative w-full h-full min-h-[350px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
-    <div ref="mapContainer" class="w-full h-full min-h-[350px]"></div>
+  <div class="relative w-full h-full min-h-[380px] rounded-xl overflow-hidden border border-slate-200 shadow-sm dark:border-slate-800">
+    <div ref="mapContainer" class="w-full h-full min-h-[380px]" :class="{ 'cursor-crosshair': isDrawingMode }"></div>
 
-    <!-- Map Legend Overlay -->
+    <!-- Drawing Controls Overlay (Top Left) -->
+    <div class="absolute top-4 left-4 z-[500] flex flex-col gap-2">
+      <button
+        type="button"
+        @click="toggleDrawingMode"
+        :class="[
+          'flex items-center gap-2 px-3.5 py-2 rounded-lg font-bold text-xs shadow-md transition-all backdrop-blur-md border',
+          isDrawingMode
+            ? 'bg-rose-600 text-white border-rose-500 hover:bg-rose-700 animate-pulse'
+            : 'bg-white/90 text-slate-800 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-900/90 dark:text-slate-100 dark:border-slate-800'
+        ]"
+      >
+        <span v-if="!isDrawingMode">✏️ Gambar Poligon Lahan Baru</span>
+        <span v-else>✖️ Batal Menggambar</span>
+      </button>
+
+      <!-- Drawing Stats Bar (When Active) -->
+      <div
+        v-if="isDrawingMode"
+        class="bg-white/95 backdrop-blur-md p-3 rounded-lg border border-emerald-500/30 shadow-lg text-xs space-y-2 dark:bg-slate-900/95 dark:border-emerald-500/40 max-w-xs"
+      >
+        <div class="flex items-center justify-between text-slate-700 dark:text-slate-200">
+          <span>📍 Jumlah Titik:</span>
+          <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ drawnPoints.length }} Titik</span>
+        </div>
+        <div class="flex items-center justify-between text-slate-700 dark:text-slate-200">
+          <span>📐 Luas Area:</span>
+          <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ calculatedAreaHa }} Ha</span>
+        </div>
+        <p class="text-[11px] text-slate-500 leading-tight">Klik pada peta untuk menambah sudut poligon (min 3 titik).</p>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button
+            type="button"
+            @click="clearDrawnShape"
+            class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            :disabled="drawnPoints.length < 3"
+            @click="finishDrawing"
+            class="flex-1 px-3 py-1 rounded bg-emerald-600 text-white font-bold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          >
+            Simpan Lahan Ini &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Legend Overlay (Bottom Right) -->
     <div class="absolute bottom-4 right-4 z-[500] bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-200 shadow-lg text-xs dark:bg-slate-900/90 dark:border-slate-800">
       <div class="font-semibold text-slate-800 dark:text-slate-200 mb-1">Tingkat Risiko Irigasi</div>
       <div class="space-y-1">
@@ -28,14 +79,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick, computed } from 'vue'
 import L from 'leaflet'
+import * as turf from '@turf/turf'
 import { useFieldStore } from '../../stores/fieldStore'
+
+const emit = defineEmits<{
+  (e: 'polygonCreated', data: { coordinates: Array<{ lat: number; lng: number }>; areaHa: number }): void
+}>()
 
 const fieldStore = useFieldStore()
 const mapContainer = ref<HTMLElement | null>(null)
 let map: L.Map | null = null
 let polygonGroup: L.LayerGroup | null = null
+let drawLayerGroup: L.LayerGroup | null = null
+
+const isDrawingMode = ref(false)
+const drawnPoints = ref<Array<[number, number]>>([]) // [lat, lng]
+
+const calculatedAreaHa = computed(() => {
+  if (drawnPoints.value.length < 3) return '0.00'
+  try {
+    // Turf uses [longitude, latitude] format
+    const coordinates = [...drawnPoints.value.map(([lat, lng]) => [lng, lat])]
+    coordinates.push(coordinates[0]) // Close polygon ring
+    const polygonFeature = turf.polygon([coordinates])
+    const areaSqMeters = turf.area(polygonFeature)
+    const areaHa = areaSqMeters / 10000
+    return areaHa.toFixed(2)
+  } catch {
+    return '0.00'
+  }
+})
 
 function getRiskColor(score: number): string {
   if (score >= 75) return '#ef4444' // Red Critical
@@ -81,6 +156,77 @@ function renderPolygons() {
   })
 }
 
+function updateDrawPreview() {
+  if (!drawLayerGroup) return
+  drawLayerGroup.clearLayers()
+
+  if (drawnPoints.value.length === 0) return
+
+  // Render markers for vertices
+  drawnPoints.value.forEach(([lat, lng], idx) => {
+    const marker = L.circleMarker([lat, lng], {
+      radius: 6,
+      color: '#059669',
+      fillColor: '#10b981',
+      fillOpacity: 1,
+      weight: 2,
+    })
+    marker.bindTooltip(`Titik ${idx + 1}`, { permanent: false, direction: 'top' })
+    drawLayerGroup!.addLayer(marker)
+  })
+
+  // Render polyline / polygon
+  if (drawnPoints.value.length === 2) {
+    const polyline = L.polyline(drawnPoints.value, {
+      color: '#059669',
+      weight: 3,
+      dashArray: '5, 5',
+    })
+    drawLayerGroup.addLayer(polyline)
+  } else if (drawnPoints.value.length >= 3) {
+    const polygon = L.polygon(drawnPoints.value, {
+      color: '#059669',
+      fillColor: '#34d399',
+      fillOpacity: 0.5,
+      weight: 3,
+    })
+    drawLayerGroup.addLayer(polygon)
+  }
+}
+
+function handleMapClick(e: L.LeafletMouseEvent) {
+  if (!isDrawingMode.value) return
+  drawnPoints.value.push([e.latlng.lat, e.latlng.lng])
+  updateDrawPreview()
+}
+
+function toggleDrawingMode() {
+  isDrawingMode.value = !isDrawingMode.value
+  if (!isDrawingMode.value) {
+    clearDrawnShape()
+  }
+}
+
+function clearDrawnShape() {
+  drawnPoints.value = []
+  if (drawLayerGroup) drawLayerGroup.clearLayers()
+}
+
+function finishDrawing() {
+  if (drawnPoints.value.length < 3) return
+
+  const coords = drawnPoints.value.map(([lat, lng]) => ({ lat, lng }))
+  const areaHa = parseFloat(calculatedAreaHa.value)
+
+  emit('polygonCreated', {
+    coordinates: coords,
+    areaHa: areaHa > 0 ? areaHa : 1.5,
+  })
+
+  isDrawingMode.value = false
+  clearDrawnShape()
+}
+
 onMounted(() => {
   if (!mapContainer.value) return
 
@@ -93,6 +239,10 @@ onMounted(() => {
   }).addTo(map)
 
   polygonGroup = L.layerGroup().addTo(map)
+  drawLayerGroup = L.layerGroup().addTo(map)
+
+  map.on('click', handleMapClick)
+
   renderPolygons()
 
   nextTick(() => {
@@ -110,6 +260,7 @@ watch(
 
 onUnmounted(() => {
   if (map) {
+    map.off('click', handleMapClick)
     map.remove()
     map = null
   }
