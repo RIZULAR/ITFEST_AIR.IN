@@ -80,7 +80,10 @@ export default function LandingPage() {
 					</nav>
 
 					{/* CTA Button */}
-					<div>
+					<div className="flex items-center gap-3">
+						<Link to="/login" className="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors px-2 py-1">
+							Masuk Akun
+						</Link>
 						<Link to="/dashboard" className="relative inline-flex h-11 items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-700 px-6 text-sm font-bold text-white border border-emerald-700 transition-all hover:scale-[102%] active:scale-95">
 							Buka Dashboard
 							<ArrowRight className="ml-2 h-4 w-4" />
