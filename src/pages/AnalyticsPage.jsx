@@ -154,7 +154,7 @@ export function AnalyticsPage({ fields = [] }) {
 							<Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase" }}>
 								Rata-rata Risiko
 							</Typography>
-							<Typography variant="h5" fontWeight={800}>{avgRisk} / 100</Typography>
+							<Typography variant="h5" fontWeight={800}>{fields.length > 0 ? `${avgRisk} / 100` : "—"}</Typography>
 						</Stack>
 						<Box sx={{ bgcolor: "rgba(99,102,241,0.08)", p: 1.2, borderRadius: 2, color: "#6366f1" }}>
 							<TrendingUp className="h-5 w-5" />

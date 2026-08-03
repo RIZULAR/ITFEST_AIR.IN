@@ -328,8 +328,8 @@ export function HomePage({ fields, onDelete }) {
 				<MetricTile
 					icon={<ShieldCheck className="h-5 w-5" />}
 					label="Skor Ketahanan Klaster (airin Score)"
-					value={`${harveyScore} / 100`}
-					subtext={harveyScore >= 60 ? "Resiliensi Klaster Baik" : "Klaster Rentan Kekeringan"}
+					value={fields.length > 0 ? `${harveyScore} / 100` : "—"}
+					subtext={fields.length > 0 ? (harveyScore >= 60 ? "Resiliensi Klaster Baik" : "Klaster Rentan Kekeringan") : "Belum Ada Lahan Terdaftar"}
 					iconBg="rgba(4,120,87,0.08)"
 					iconColor="#047857"
 				/>
