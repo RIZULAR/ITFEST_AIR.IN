@@ -60,8 +60,8 @@ export function AnalyticsPage({ fields = [] }) {
 
 	const avgRisk = fields.length > 0
 		? Math.round(fieldsWithRisk.reduce((s, f) => s + f.score, 0) / fields.length)
-		: 62;
-	const harveyScore = Math.max(0, 100 - avgRisk);
+		: 0;
+	const harveyScore = fields.length > 0 ? Math.max(0, 100 - avgRisk) : 100;
 
 	// Soil type distribution
 	const soilDist = {};

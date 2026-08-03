@@ -268,8 +268,8 @@ export function HomePage({ fields, onDelete }) {
 		? Math.round(
 				fields.reduce((s, f) => s + (f.temp ? Math.round(50 + (f.temp - 30) * 8) : 62), 0) / fields.length
 			)
-		: 62;
-	const harveyScore = Math.max(0, 100 - avgRisk);
+		: 0;
+	const harveyScore = fields.length > 0 ? Math.max(0, 100 - avgRisk) : 100;
 
 	// Risk classification counts
 	const lowRiskCount = fields.filter(f => (f.temp ? Math.round(50 + (f.temp - 30) * 8) : 62) < 40).length;
