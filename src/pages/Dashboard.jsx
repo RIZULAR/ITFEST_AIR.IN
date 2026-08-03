@@ -11,7 +11,7 @@ import {
 	useParams,
 } from 'react-router-dom';
 
-import LogoImg from '@/assets/logo/logo.jpg';
+import LogoImg from '@/assets/logo/logo.png';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -49,21 +49,43 @@ import {
 	calcRiskScore,
 	WaterAllocationPage,
 } from './WaterAllocationPage.jsx';
+import { Sun, Flame } from 'lucide-react';
+import { getWeatherSummary } from '../services/weatherService.js';
 
 const theme = createTheme({
 	palette: {
-		primary: { main: "#2D6A4F" },
-		background: { default: "#f5f5f5", paper: "#ffffff" },
-		text: { primary: "#1a1a2e", secondary: "#6b7280" },
+		primary: { main: "#047857" },
+		background: { default: "#f8fafc", paper: "#ffffff" },
+		text: { primary: "#0f172a", secondary: "#64748b" },
+		divider: "#e2e8f0",
 	},
 	typography: {
 		fontFamily: '"Inter", "Roboto", sans-serif',
 	},
-	shape: { borderRadius: 10 },
+	shadows: Array(25).fill("none"),
+	shape: { borderRadius: 12 },
 	components: {
 		MuiPaper: {
-			styleOverrides: { root: { boxShadow: "0 1px 4px rgba(0,0,0,0.08)" } },
+			defaultProps: {
+				elevation: 0,
+				variant: "outlined",
+			},
+			styleOverrides: {
+				root: {
+					boxShadow: "none !important",
+					border: "1px solid #e2e8f0 !important",
+				}
+			},
 		},
+		MuiButton: {
+			styleOverrides: {
+				root: {
+					boxShadow: "none !important",
+					borderRadius: 12,
+					textTransform: "none",
+				}
+			}
+		}
 	},
 });
 
@@ -108,8 +130,13 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 			>
 				<Stack direction="row" alignItems="center" spacing={2}>
 					<div className="flex items-center gap-3">
-						<img src={LogoImg} className="h-10" alt="Harvey Logo" />
-						<p className="text-2xl font-bold">Harvey</p>
+						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 flex-shrink-0">
+							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
+						</div>
+						<div>
+							<span className="text-xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
+							<p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
+						</div>
 					</div>
 				</Stack>
 			</Box>
@@ -125,7 +152,7 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 							startIcon={
 								<Box
 									sx={{
-										color: page === n.key ? "primary.main" : "text.secondary",
+										color: page === n.key ? "#ffffff" : "text.secondary",
 										display: "flex",
 										"& svg": { fontSize: 20 },
 									}}
@@ -136,14 +163,17 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 							sx={{
 								justifyContent: "flex-start",
 								px: 2,
-								py: 1,
-								borderRadius: 1.5,
-								color: page === n.key ? "primary.main" : "text.secondary",
-								bgcolor: page === n.key ? "rgba(45,106,79,0.1)" : "transparent",
+								py: 1.2,
+								borderRadius: 2,
+								color: page === n.key ? "#ffffff" : "text.secondary",
+								bgcolor: page === n.key ? "#047857" : "transparent",
 								fontWeight: page === n.key ? 700 : 500,
 								fontSize: "0.875rem",
 								textTransform: "none",
-								"&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
+								"&:hover": {
+									bgcolor: page === n.key ? "#047857" : "rgba(0,0,0,0.04)",
+									color: page === n.key ? "#ffffff" : "text.secondary"
+								},
 							}}
 						>
 							{n.label}
@@ -252,10 +282,42 @@ export default function Dashboard() {
 				)
 			: null;
 
+	const [elNinoSeverity, setElNinoSeverity] = useState(() => {
+		const saved = localStorage.getItem("elNinoSeverity");
+		return saved !== null ? Number(saved) : 0;
+	});
+	const [weather, setWeather] = useState({ temp: 27.6, desc: "Cerah Berawan", et0: 5.13 });
+
+	useEffect(() => {
+		const handleStorageChange = () => {
+			const saved = localStorage.getItem("elNinoSeverity");
+			if (saved !== null) setElNinoSeverity(Number(saved));
+		};
+		window.addEventListener("storage", handleStorageChange);
+		const interval = setInterval(handleStorageChange, 1000);
+		return () => {
+			window.removeEventListener("storage", handleStorageChange);
+			clearInterval(interval);
+		};
+	}, []);
+
 	useEffect(() => {
 		getFields()
 			.then((data) => {
 				setFields(data);
+				if (data.length > 0) {
+					const lat = data[0].lat ?? -7.4478;
+					const lon = data[0].lon ?? data[0].lng ?? 112.7183;
+					getWeatherSummary(lat, lon)
+						.then((wData) => {
+							setWeather({
+								temp: wData?.temp ?? 27.6,
+								desc: wData?.description ?? "Cerah Berawan",
+								et0: wData?.windSpeed ? Number((4.5 + wData.windSpeed * 0.1).toFixed(2)) : 5.13,
+							});
+						})
+						.catch(console.error);
+				}
 			})
 			.catch(console.error)
 			.finally(() => setLoading(false));
@@ -325,30 +387,76 @@ export default function Dashboard() {
 							alignItems: "center",
 							justifyContent: "space-between",
 							flexShrink: 0,
-							gap: 1,
+							gap: 2,
 						}}
 					>
-						{isMobile && (
-							<IconButton
-								onClick={() => setDrawerOpen(true)}
-								size="small"
-								sx={{ color: "text.primary" }}
-							>
-								<MenuIcon />
-							</IconButton>
+						<Stack direction="row" alignItems="center" spacing={1}>
+							{isMobile && (
+								<IconButton
+									onClick={() => setDrawerOpen(true)}
+									size="small"
+									sx={{ color: "text.primary" }}
+								>
+									<MenuIcon />
+								</IconButton>
+							)}
+							<Stack spacing={0.2}>
+								<Typography
+									variant="h6"
+									fontWeight={700}
+									sx={{ fontSize: isMobile ? "1rem" : "h6", whiteSpace: "nowrap", lineHeight: 1.2 }}
+								>
+									{PAGE_TITLES[page] ?? "Dashboard"}
+								</Typography>
+								{!isMobile && (
+									<Typography variant="caption" sx={{ fontSize: 10, color: "text.secondary", fontWeight: 500 }}>
+										Smart Agriculture &amp; Water Allocation Platform
+									</Typography>
+								)}
+							</Stack>
+						</Stack>
+
+						{!isMobile && (
+							<Stack direction="row" spacing={1.5} alignItems="center">
+								{/* Weather Pill */}
+								<Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#f8fafc" }}>
+									<Sun className="h-4.5 w-4.5 text-slate-500" />
+									<Stack spacing={0.25}>
+										<Stack direction="row" spacing={1} alignItems="center" sx={{ leading: "none" }}>
+											<Typography variant="caption" fontWeight={700} color="text.primary" sx={{ fontSize: 11 }}>
+												{weather.desc}
+											</Typography>
+											<Typography variant="caption" color="text.secondary" sx={{ fontSize: 11 }}>|</Typography>
+											<Typography variant="caption" fontWeight={800} color="text.primary" sx={{ fontSize: 11 }}>
+												{weather.temp}°C
+											</Typography>
+										</Stack>
+										<Typography variant="caption" sx={{ fontSize: 9, color: "text.secondary", fontWeight: 500 }}>
+											Evapotranspirasi ET0: {weather.et0} mm/d
+										</Typography>
+									</Stack>
+								</Box>
+
+								{/* El Nino Pill */}
+								<Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#f8fafc" }}>
+									<Flame className="h-4.5 w-4.5 text-slate-500" />
+									<Stack spacing={0.25}>
+										<Stack direction="row" spacing={1} alignItems="center" sx={{ leading: "none" }}>
+											<Typography variant="caption" fontWeight={700} color="text.primary" sx={{ fontSize: 11 }}>
+												El Niño Status
+											</Typography>
+											<Typography variant="caption" color="text.secondary" sx={{ fontSize: 11 }}>|</Typography>
+											<Typography variant="caption" fontWeight={800} color="text.primary" sx={{ fontSize: 11 }}>
+												Level {elNinoSeverity} / 10
+											</Typography>
+										</Stack>
+										<Typography variant="caption" sx={{ fontSize: 9, color: "text.secondary", fontWeight: 500 }}>
+											Defisit Pasokan Irigasi
+										</Typography>
+									</Stack>
+								</Box>
+							</Stack>
 						)}
-						<Typography
-							variant="h6"
-							fontWeight={700}
-							sx={{ fontSize: isMobile ? "1rem" : "h6", whiteSpace: "nowrap" }}
-						>
-							{PAGE_TITLES[page] ?? "Dashboard"}
-						</Typography>
-						{/*{!isMobile && (
-							<Typography variant="caption" sx={{ color: "text.secondary" }}>
-								{fields.length} lahan
-							</Typography>
-						)}*/}
 					</Box>
 
 					<Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
@@ -376,7 +484,7 @@ export default function Dashboard() {
 						) : page === "map" ? (
 							<MapPage fields={fields} onFieldCreate={handleFieldCreate} />
 						) : page === "analytics" ? (
-							<AnalyticsPage />
+							<AnalyticsPage fields={fields} />
 						) : null}
 					</Box>
 				</Box>

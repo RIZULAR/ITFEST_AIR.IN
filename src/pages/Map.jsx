@@ -686,7 +686,7 @@ export default function Map() {
 								fontWeight={800}
 								sx={{ color: "white", lineHeight: 1.2, letterSpacing: 1 }}
 							>
-								HARVEY
+								airin
 							</Typography>
 							<Typography
 								variant="caption"

@@ -125,6 +125,17 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 	const [editField, setEditField] = useState(null);
 	const [expandedId, setExpandedId] = useState(null);
 	const [confirmSave, setConfirmSave] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+
+	const filteredFields = (fields || []).filter((f) => {
+		const query = searchQuery.toLowerCase();
+		return (
+			(f.name || "").toLowerCase().includes(query) ||
+			(f.owner || "").toLowerCase().includes(query) ||
+			(f.crop_type || "").toLowerCase().includes(query) ||
+			(f.soilType || "").toLowerCase().includes(query)
+		);
+	});
 
 	const handleEditOpen = (field, e) => {
 		e.stopPropagation();
@@ -166,47 +177,56 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 				overflow: "hidden",
 			}}
 		>
-			<Box
-				sx={{
-					px: { xs: 1.5, md: 3 },
-					py: 2.5,
-					borderBottom: "1px solid",
-					borderColor: "divider",
-					bgcolor: "background.paper",
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-					flexDirection: { xs: "column", sm: "row" },
-					gap: 1,
-				}}
-			>
-				<Box>
-					<Typography variant="h6" fontWeight={700}>
-						Daftar Lahan
-					</Typography>
-					<Typography variant="caption" color="text.secondary">
-						{fields.length} lahan ·{" "}
-						{new Date().toLocaleDateString("id-ID", {
-							weekday: "long",
-							day: "numeric",
-							month: "long",
-							year: "numeric",
-						})}
-					</Typography>
-				</Box>
-				<Button
-					component={Link}
-					to="/dashboard/map"
-					variant="contained"
-					size="small"
-					startIcon={<MapAltIcon />}
-					sx={{ width: { xs: "100%", sm: "auto" } }}
+			<Box sx={{ p: { xs: 2, md: 3 }, pb: 1 }}>
+				<Paper
+					variant="outlined"
+					elevation={0}
+					sx={{
+						p: { xs: 2.5, md: 3 },
+						bgcolor: "background.paper",
+						borderRadius: 3,
+						border: "1px solid",
+						borderColor: "divider",
+						display: "flex",
+						flexDirection: "column",
+						gap: 1.5,
+					}}
 				>
-					Tambah Lahan di Peta
-				</Button>
+					{/* Category Tag Badge */}
+					<Box sx={{ display: "flex" }}>
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+								px: 1.5,
+								py: 0.5,
+								borderRadius: 1.5,
+								bgcolor: "rgba(4,120,87,0.06)",
+								color: "#047857",
+								border: "1px solid rgba(4,120,87,0.18)",
+							}}
+						>
+							<MapAltIcon sx={{ fontSize: 16 }} />
+							<Typography variant="caption" fontWeight={800} sx={{ textTransform: "uppercase", letterSpacing: 0.5 }}>
+								Manajemen Wilayah
+							</Typography>
+						</Box>
+					</Box>
+
+					{/* Text Content */}
+					<Stack spacing={0.5}>
+						<Typography variant="h5" fontWeight={900} sx={{ color: "text.primary", letterSpacing: -0.5 }}>
+							Daftar Lahan Pertanian
+						</Typography>
+						<Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+							Kelola pemetaan polygon lahan, tipe tanah, fase tanaman, dan riwayat penyiraman secara presisi.
+						</Typography>
+					</Stack>
+				</Paper>
 			</Box>
 
-			<Paper
+			<Paper variant="outlined" elevation={0}
 				sx={{
 					bgcolor: "background.paper",
 					border: "1px solid",
@@ -216,10 +236,69 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 					overflow: "hidden",
 				}}
 			>
-				{fields.length === 0 ? (
+				<Box
+					sx={{
+						p: 2.5,
+						borderBottom: "1px solid",
+						borderColor: "divider",
+						display: "flex",
+						flexDirection: { xs: "column", sm: "row" },
+						justifyContent: "space-between",
+						alignItems: { xs: "stretch", sm: "center" },
+						gap: 2,
+					}}
+				>
+					<Box>
+						<Typography variant="subtitle1" fontWeight={800} sx={{ color: "text.primary" }}>
+							Rincian Petak Lahan
+						</Typography>
+						<Typography variant="caption" color="text.secondary">
+							Total Terdaftar: <b>{filteredFields.length} Lahan</b> ({fields.reduce((s, f) => s + (f.area_ha || 0), 0).toFixed(1)} Ha)
+						</Typography>
+					</Box>
+
+					<Stack direction="row" spacing={2} alignItems="center" sx={{ width: { xs: "100%", sm: "auto" } }}>
+						{/* Search Input */}
+						<TextField
+							size="small"
+							placeholder="Cari nama lahan atau pemilik..."
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							sx={{
+								width: { xs: "100%", sm: 260 },
+								"& .MuiOutlinedInput-root": {
+									borderRadius: 3,
+								}
+							}}
+						/>
+
+						{/* Add Button */}
+						<Button
+							component={Link}
+							to="/dashboard/map"
+							variant="contained"
+							size="small"
+							startIcon={<MapAltIcon />}
+							sx={{
+								whiteSpace: "nowrap",
+								bgcolor: "#047857",
+								color: "#ffffff",
+								px: 2.5,
+								py: 1,
+								borderRadius: 3,
+								fontWeight: 700,
+								"&:hover": { bgcolor: "#065f46" }
+							}}
+						>
+							Tambah Lahan
+						</Button>
+					</Stack>
+				</Box>
+
+				{filteredFields.length === 0 ? (
 					<Box sx={{ p: 6, textAlign: "center" }}>
 						<MapAltIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
-						<Typography color="text.secondary">Belum ada lahan.</Typography>
+						<Typography color="text.secondary">Belum ada lahan cocok.</Typography>
 						<Button component={Link} to="/dashboard/map" variant="outlined" sx={{ mt: 2 }}>
 							Buat di Peta
 						</Button>
@@ -229,42 +308,45 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 						<Stack spacing={0}>
 							<Stack
 								direction="row"
+								alignItems="center"
 								sx={{
 									px: 2.5,
 									py: 1.5,
 									borderBottom: "1px solid",
 									borderColor: "divider",
-									bgcolor: "rgba(255,255,255,0.02)",
+									bgcolor: "#f8fafc",
 								}}
 							>
-								<Box sx={{ width: 32 }} />
+								{/* Circle & Chevron Spacer */}
+								<Box sx={{ width: 44, flexShrink: 0 }} />
+								
 								{[
-									"Nama Lahan",
-									"Luas",
-									"Suhu",
-									"Humid",
-									"Angin",
-									"Tanam",
-									"Tahap",
-									"Edit",
-									"Hapus",
-								].map((h) => (
+									["Nama Lahan", 3],
+									["Luas", 1],
+									["Suhu", 1],
+									["Humid", 1],
+									["Angin", 1],
+									["Tanam", 1],
+									["Tahap", 1],
+									["Aksi", 0.8],
+								].map(([h, flexVal]) => (
 									<Typography
 										key={h}
 										variant="caption"
-										fontWeight={700}
+										fontWeight={800}
 										sx={{
-											flex: 1,
+											flex: flexVal,
 											color: "text.secondary",
 											textTransform: "uppercase",
 											letterSpacing: 0.8,
+											textAlign: h === "Aksi" ? "center" : "left",
 										}}
 									>
 										{h}
 									</Typography>
 								))}
 							</Stack>
-							{fields.map((f) => {
+							{filteredFields.map((f, idx) => {
 								const g = getGrowthStage(f.plantingDate);
 								const isExpanded = expandedId === f.id;
 								return (
@@ -294,29 +376,59 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 											}}
 										>
 											<Box
-												sx={{
-													width: 32,
-													display: "flex",
-													color: "text.secondary",
-												}}
+												sx={{ display: "flex", alignItems: "center", gap: 0.5, mr: 1.5, flexShrink: 0 }}
 											>
+												<Box
+													sx={{
+														width: 24,
+														height: 24,
+														borderRadius: "50%",
+														bgcolor: "rgba(4,120,87,0.06)",
+														border: "1px solid rgba(4,120,87,0.18)",
+														display: "flex",
+														alignItems: "center",
+														justifyContent: "center",
+														flexShrink: 0,
+													}}
+												>
+													<Typography
+														variant="caption"
+														fontWeight={800}
+														sx={{
+															color: "#047857",
+															fontSize: 10,
+														}}
+													>
+														{idx + 1}
+													</Typography>
+												</Box>
 												<ExpandMoreIcon
 													sx={{
-														fontSize: 18,
-														transition: "transform 0.2s",
+														fontSize: 16,
+														color: "text.secondary",
 														transform: isExpanded
 															? "rotate(180deg)"
 															: "rotate(0deg)",
+														transition: "transform 0.2s",
 													}}
 												/>
 											</Box>
-											<Typography
-												variant="body2"
-												fontWeight={600}
-												sx={{ flex: 1 }}
-											>
-												{f.name}
-											</Typography>
+											<Box sx={{ flex: 3, minWidth: 0 }}>
+												<Typography
+													variant="body2"
+													fontWeight={700}
+													sx={{ color: "text.primary", lineHeight: 1.2 }}
+												>
+													{f.name}
+												</Typography>
+												<Typography
+													variant="caption"
+													color="text.secondary"
+													sx={{ display: "block", lineHeight: 1.2, mt: 0.25 }}
+												>
+													{f.crop_type ?? "Jenis tanaman belum diisi"}
+												</Typography>
+											</Box>
 											<Typography variant="body2" sx={{ flex: 1 }}>
 												{f.area_ha?.toFixed(2)} ha
 											</Typography>
@@ -353,20 +465,22 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 													</Box>
 												)}
 											</Box>
-											<IconButton
-												size="small"
-												onClick={(e) => handleEditOpen(f, e)}
-												sx={{ color: "primary.main", flex: 1 }}
-											>
-												<EditIcon sx={{ fontSize: 16 }} />
-											</IconButton>
-											<IconButton
-												size="small"
-												onClick={(e) => handleDelete(f.id, e)}
-												sx={{ color: "error.main", flex: 1 }}
-											>
-												<DeleteIcon sx={{ fontSize: 16 }} />
-											</IconButton>
+											<Stack direction="row" spacing={0.5} justifyContent="center" sx={{ flex: 0.8, flexShrink: 0 }}>
+												<IconButton
+													size="small"
+													onClick={(e) => handleEditOpen(f, e)}
+													sx={{ color: "primary.main" }}
+												>
+													<EditIcon sx={{ fontSize: 16 }} />
+												</IconButton>
+												<IconButton
+													size="small"
+													onClick={(e) => handleDelete(f.id, e)}
+													sx={{ color: "error.main" }}
+												>
+													<DeleteIcon sx={{ fontSize: 16 }} />
+												</IconButton>
+											</Stack>
 										</Stack>
 
 										<Collapse in={isExpanded} timeout="auto" mountOnEnter unmountOnExit={false}>
@@ -494,17 +608,22 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 			>
 				<DialogTitle fontWeight={700}>Edit Lahan</DialogTitle>
 				<DialogContent>
-					<Stack spacing={2} mt={1}>
-						<TextField
-							label="Nama Lahan"
-							value={editField?.name ?? ""}
-							onChange={(e) =>
-								setEditField((f) => ({ ...f, name: e.target.value }))
-							}
-							onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
-							fullWidth
-							size="small"
-						/>
+					<Stack spacing={2.5} mt={2}>
+						<FormControl variant="outlined" size="small" fullWidth>
+							<InputLabel shrink htmlFor="edit-name">
+								Nama Lahan
+							</InputLabel>
+							<OutlinedInput
+								id="edit-name"
+								value={editField?.name ?? ""}
+								onChange={(e) =>
+									setEditField((f) => ({ ...f, name: e.target.value }))
+								}
+								onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
+								label="Nama Lahan"
+								notched
+							/>
+						</FormControl>
 						<FormControl variant="outlined" size="small" fullWidth>
 							<InputLabel shrink htmlFor="edit-planting-date">
 								Tanggal Tanam
@@ -590,3 +709,4 @@ function StatRow({ icon, label, value, unit }) {
 		</Stack>
 	);
 }
+

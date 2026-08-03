@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
     MapContainer, TileLayer, Polyline, CircleMarker, Polygon,
-    useMap,
+    useMap, Popup
 } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import Box from '@mui/material/Box'
@@ -31,6 +31,8 @@ import { getBrowserLocation, calcAreaFromPoints, calcCentroidFromPoints } from '
 import { getWeatherSummary } from '../services/weatherService.js'
 import { getSoilSummary } from '../services/soilService.js'
 import { getLast30DaysRainfall } from '../services/rainfallService.js'
+import { riskColor, riskLabel } from './WaterAllocationPage.jsx'
+import { getGrowthStage } from '../utils/growthUtils'
 
 function MapUpdater({ center, zoom }) {
     const map = useMap()
@@ -162,18 +164,70 @@ export default function MapPage({ fields, onFieldCreate }) {
                     <MapClicker onClick={pt => setDrawPoints(p => [...p, pt])} />
 
                     {/* Saved field polygons */}
-                    {finishedPolygons.map((pts, i) => (
-                        <Polygon
-                            key={i}
-                            positions={pts}
-                            pathOptions={{
-                                color: '#00e676',
-                                weight: 2.5,
-                                fillColor: '#00e676',
-                                fillOpacity: 0.25,
-                            }}
-                        />
-                    ))}
+                    {fields.filter(f => f.polygonPoints && Array.isArray(f.polygonPoints)).map((f, i) => {
+                        const pts = f.polygonPoints.map(p => ({
+                            lat: Number(p.lat ?? p[0]),
+                            lng: Number(p.lng ?? p.lon ?? p[1])
+                        })).filter(p => !isNaN(p.lat) && !isNaN(p.lng));
+                        
+                        if (pts.length < 3) return null;
+                        
+                        const score = f.temp ? Math.round(50 + (f.temp - 30) * 8) : 62;
+                        const color = riskColor(score);
+                        const stage = getGrowthStage(f.plantingDate)?.stage || 'Pra-Panen';
+                        
+                        return (
+                            <Polygon
+                                key={f.id || i}
+                                positions={pts}
+                                pathOptions={{
+                                    color: color,
+                                    weight: 2.5,
+                                    fillColor: color,
+                                    fillOpacity: 0.25,
+                                }}
+                            >
+                                <Popup>
+                                    <div style={{ fontFamily: "'Inter', sans-serif", minWidth: "220px", padding: "2px" }}>
+                                        {/* Header */}
+                                        <div style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "8px", marginBottom: "8px" }}>
+                                            <h4 style={{ fontWeight: 800, fontSize: "13px", margin: 0, color: "#0f172a", lineHeight: 1.2 }}>
+                                                {f.name}
+                                            </h4>
+                                        </div>
+                                        
+                                        {/* Info Rows */}
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "10px" }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                                                <span style={{ color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>Pemilik</span>
+                                                <span style={{ color: "#334155", fontWeight: 700 }}>{f.owner}</span>
+                                            </div>
+                                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                                                <span style={{ color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>Komoditas</span>
+                                                <span style={{ color: "#334155", fontWeight: 700 }}>{f.crop_type}</span>
+                                            </div>
+                                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                                                <span style={{ color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>Luas Lahan</span>
+                                                <span style={{ color: "#334155", fontWeight: 700 }}>{f.area_ha} Ha</span>
+                                            </div>
+                                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                                                <span style={{ color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>Fase Tumbuh</span>
+                                                <span style={{ color: "#334155", fontWeight: 700 }}>{stage}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Risk Level */}
+                                        <div style={{ padding: "6px 8px", background: `${color}10`, borderRadius: "6px", border: `1px solid ${color}30`, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "11px" }}>
+                                            <span style={{ fontWeight: 700, color: "#475569" }}>Skor Risiko</span>
+                                            <span style={{ fontWeight: 800, color: color, fontSize: "11px", padding: "1px 5px", background: "white", border: `1px solid ${color}30`, borderRadius: "4px" }}>
+                                                {score}/100 ({riskLabel(score)})
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Popup>
+                            </Polygon>
+                        );
+                    })}
 
                     {/* Drawing preview */}
                     {validDrawPoints.length > 0 && (
@@ -230,7 +284,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                             bgcolor: 'rgba(255,255,255,0.92)',
                             color: 'text.primary',
                             fontWeight: 700,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            border: '1px solid #cbd5e1',
                             backdropFilter: 'blur(4px)',
                             '&:hover': { bgcolor: '#ffffff' }
                         }}
@@ -280,7 +334,8 @@ export default function MapPage({ fields, onFieldCreate }) {
                 }}>
                     {highlightedField && (
                         <Paper
-                            elevation={3}
+                            variant="outlined"
+                            elevation={0}
                             component={Link}
                             to="/dashboard/fields"
                             sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'primary.main', color: 'white', borderRadius: 2, textDecoration: 'none', cursor: 'pointer' }}
@@ -312,7 +367,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                         <Chip
                             label={`${validDrawPoints.length} titik${validDrawPoints.length < 3 ? ` (min ${3 - validDrawPoints.length} lagi)` : ''}`}
                             size="small"
-                            sx={{ bgcolor: 'white', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+                            sx={{ bgcolor: 'white', fontWeight: 600, border: '1px solid #cbd5e1' }}
                         />
                     </Box>
                 )}
@@ -321,7 +376,7 @@ export default function MapPage({ fields, onFieldCreate }) {
                 <Box sx={{
                     position: 'absolute', bottom: { xs: 60, md: 16 }, left: { xs: 8, md: 16 }, zIndex: 600,
                     bgcolor: 'rgba(255,255,255,0.9)', borderRadius: 1.5, px: 1.5, py: 1,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)', backdropFilter: 'blur(4px)',
+                    border: '1px solid #cbd5e1', backdropFilter: 'blur(4px)',
                     display: { xs: 'none', sm: 'block' },
                 }}>
                     <Stack spacing={0.5}>

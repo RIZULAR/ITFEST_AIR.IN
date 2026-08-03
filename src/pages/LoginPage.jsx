@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginBgImg from '@/assets/images/login-bg.jpg';
+import LogoImg from '@/assets/logo/logo.png';
 import { signInWithPassword, signUp } from '../services/authService';
 
 function Spinner() {
@@ -80,9 +81,17 @@ export default function LoginPage() {
 
 				{/* Content */}
 				<div className="relative z-10 flex flex-col justify-end p-12 text-white">
-					<h1 className="text-5xl font-bold mb-4">AIR.IN</h1>
-					<p className="max-w-md text-lg text-white/90">
-						Decision Support System for Irrigation (AIR.IN Platform)
+					<div className="flex items-center gap-4 mb-5">
+						<div className="flex h-18 w-18 items-center justify-center rounded-2xl border border-white/20 bg-white p-0.5 flex-shrink-0">
+							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
+						</div>
+						<div>
+							<span className="text-4xl font-black tracking-tight text-white block leading-tight">air.in</span>
+							<p className="text-[12px] font-bold text-emerald-200 uppercase tracking-widest leading-none mt-1">Agriculture Platform</p>
+						</div>
+					</div>
+					<p className="max-w-md text-base text-white/90 font-medium">
+						Decision Support System for Irrigation (air.in Platform)
 					</p>
 				</div>
 			</div>
@@ -90,6 +99,16 @@ export default function LoginPage() {
 			{/* Right Section - Form */}
 			<div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-stone-50">
 				<div className="w-full max-w-sm">
+					<div className="flex items-center gap-3.5 mb-6">
+						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 flex-shrink-0">
+							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
+						</div>
+						<div>
+							<span className="text-2xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
+							<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
+						</div>
+					</div>
+
 					<div className="flex bg-stone-200 p-1 rounded-xl mb-6">
 						<button
 							type="button"
@@ -113,12 +132,12 @@ export default function LoginPage() {
 
 					<div className="mb-6">
 						<h2 className="text-2xl font-bold text-stone-800">
-							{mode === "login" ? "Masuk Platform" : "Daftar Akun AIR.IN"}
+							{mode === "login" ? "Masuk Platform" : "Daftar Akun air.in"}
 						</h2>
 						<p className="text-stone-500 text-sm mt-1">
 							{mode === "login"
 								? "Masukkan Email & Password akun terdaftar Anda."
-								: "Buat akun baru untuk mengakses platform irigasi AIR.IN."}
+								: "Buat akun baru untuk mengakses platform irigasi air.in."}
 						</p>
 					</div>
 

@@ -386,7 +386,7 @@ export default function Home() {
                             <LayersIcon className="text-green-700 text-2xl" />
                         </Box>
                         <Box>
-                            <Typography variant="h6" fontWeight={800} className="text-white leading-tight tracking-wider">HARVEY</Typography>
+                            <Typography variant="h6" fontWeight={800} className="text-white leading-tight tracking-wider">airin</Typography>
                             <Typography variant="caption" className="text-green-200 tracking-wide">Pantau Risiko Lahan</Typography>
                         </Box>
                     </Stack>
