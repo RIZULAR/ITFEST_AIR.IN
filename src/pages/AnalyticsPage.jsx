@@ -397,8 +397,8 @@ export function AnalyticsPage({ fields = [] }) {
 						</Box>
 
 						{/* Custom SVG Line Chart representation */}
-						<Box sx={{ position: "relative", height: 180, width: "100%", mt: 2 }}>
-							<svg viewBox="0 0 400 160" width="100%" height="100%" style={{ overflow: "visible" }}>
+						<Box sx={{ position: "relative", width: "100%", mt: 2, pb: 2 }}>
+							<svg viewBox="0 0 400 160" width="100%" height={160} style={{ overflow: "visible" }}>
 								{/* Gradients */}
 								<defs>
 									<linearGradient id="curve-grad" x1="0" y1="0" x2="0" y2="1">

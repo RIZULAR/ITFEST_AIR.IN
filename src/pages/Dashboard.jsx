@@ -130,8 +130,8 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 			>
 				<Stack direction="row" alignItems="center" spacing={2}>
 					<div className="flex items-center gap-3">
-						<div className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 p-0.5">
-							<img src={LogoImg} className="w-full h-[140%] object-cover object-top" alt="air.in Logo" />
+						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 flex-shrink-0">
+							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
 						</div>
 						<div>
 							<span className="text-xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>

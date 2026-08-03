@@ -73,13 +73,13 @@ export default function LoginPage() {
 
 				{/* Content */}
 				<div className="relative z-10 flex flex-col justify-end p-12 text-white">
-					<div className="flex items-center gap-3 mb-4">
-						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white overflow-hidden flex-shrink-0 p-0.5">
-							<img src={LogoImg} className="w-full h-[140%] object-cover object-top" alt="air.in Logo" />
+					<div className="flex items-center gap-4 mb-5">
+						<div className="flex h-18 w-18 items-center justify-center rounded-2xl border border-white/20 bg-white p-0.5 flex-shrink-0">
+							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
 						</div>
 						<div>
-							<span className="text-3xl font-black tracking-tight text-white block leading-tight">air.in</span>
-							<p className="text-[11px] font-bold text-emerald-200 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
+							<span className="text-4xl font-black tracking-tight text-white block leading-tight">air.in</span>
+							<p className="text-[12px] font-bold text-emerald-200 uppercase tracking-widest leading-none mt-1">Agriculture Platform</p>
 						</div>
 					</div>
 					<p className="max-w-md text-base text-white/90 font-medium">
@@ -92,13 +92,13 @@ export default function LoginPage() {
 			<div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-stone-50">
 				<div className="w-full max-w-sm">
 					<div className="mb-8">
-						<div className="flex items-center gap-3 mb-6">
-							<div className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 p-0.5">
-								<img src={LogoImg} className="w-full h-[140%] object-cover object-top" alt="air.in Logo" />
+						<div className="flex items-center gap-3.5 mb-6">
+							<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 flex-shrink-0">
+								<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
 							</div>
 							<div>
-								<span className="text-xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
-								<p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
+								<span className="text-2xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
+								<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
 							</div>
 						</div>
 						<h2 className="text-2xl font-bold text-stone-800">Masuk Platform</h2>

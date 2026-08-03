@@ -62,8 +62,8 @@ export default function LandingPage() {
 				<div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-8">
 					{/* Logo */}
 					<div className="flex items-center gap-3">
-						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 p-0.5">
-							<img src={LogoImg} className="w-full h-[140%] object-cover object-top" alt="air.in Logo" />
+						<div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 flex-shrink-0">
+							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
 						</div>
 						<div>
 							<span className="text-2xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
