@@ -160,30 +160,31 @@ function GrowthCard({ fields }) {
 								"&:hover": { bgcolor: "rgba(255,255,255,0.02)" },
 							}}
 						>
-							<Stack spacing={1.5}>
+							<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, width: "100%" }}>
 								{/* Header row: Stage Name & Count info */}
-								<Stack direction="row" justifyContent="space-between" alignItems="center">
-									<Stack direction="row" alignItems="center" spacing={1.5}>
+								<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", pr: 6 }}>
+									<Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
 										<Box
 											sx={{
 												width: 10,
 												height: 10,
 												borderRadius: "50%",
 												bgcolor: color,
+												flexShrink: 0,
 											}}
 										/>
 										<Typography variant="subtitle2" fontWeight={750} sx={{ fontSize: 13.5 }}>
 											{stage}
 										</Typography>
-									</Stack>
+									</Box>
 									
-									<Typography variant="body2" fontWeight={850} color="text.primary" sx={{ fontSize: 13 }}>
+									<Typography variant="body2" fontWeight={850} color="text.primary" sx={{ fontSize: 13, flexShrink: 0 }}>
 										{count} <span style={{ fontWeight: 500, color: "#64748b", fontSize: 11.5 }}>/ {total} Lahan</span>
 									</Typography>
-								</Stack>
+								</Box>
 								
 								{/* Progress Bar & Percentage row */}
-								<Stack direction="row" alignItems="center" spacing={2.5}>
+								<Box sx={{ display: "flex", alignItems: "center", gap: 2.5, width: "100%" }}>
 									<Box sx={{ flex: 1, height: 6, bgcolor: "#f1f5f9", borderRadius: 3, overflow: "hidden" }}>
 										<Box
 											sx={{
@@ -195,11 +196,11 @@ function GrowthCard({ fields }) {
 											}}
 										/>
 									</Box>
-									<Typography variant="caption" fontWeight={800} color="text.secondary" sx={{ minWidth: 28, textAlign: "right" }}>
+									<Typography variant="caption" fontWeight={800} color="text.secondary" sx={{ minWidth: 28, textAlign: "right", flexShrink: 0 }}>
 										{pct}%
 									</Typography>
-								</Stack>
-							</Stack>
+								</Box>
+							</Box>
 						</Box>
 					);
 				})}
