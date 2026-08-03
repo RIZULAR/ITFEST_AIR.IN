@@ -9,6 +9,10 @@ export async function signInWithPassword(email, password) {
 	return supabase.auth.signInWithPassword({ email, password });
 }
 
+export async function signUp(email, password) {
+	return supabase.auth.signUp({ email, password });
+}
+
 export async function signInWithOAuth(provider = "google") {
 	return supabase.auth.signInWithOAuth({ provider });
 }

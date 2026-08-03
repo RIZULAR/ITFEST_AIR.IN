@@ -1,10 +1,7 @@
-/** @format */
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginBgImg from '@/assets/images/login-bg.jpg';
-import { signInWithPassword } from '../services/authService';
-import { useAuth } from '../contexts/AuthContext';
+import { signInWithPassword, signUp } from '../services/authService';
 
 function Spinner() {
 	return (
@@ -33,28 +30,39 @@ function Spinner() {
 
 export default function LoginPage() {
 	const navigate = useNavigate();
-	const { loginAsDemo } = useAuth();
+	const [mode, setMode] = useState("login"); // 'login' | 'register'
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [successMsg, setSuccessMsg] = useState("");
 
-	async function handleEmailLogin(e) {
+	async function handleSubmit(e) {
 		e.preventDefault();
 		setError("");
+		setSuccessMsg("");
 		setLoading(true);
-		const { error } = await signInWithPassword(email, password);
-		setLoading(false);
-		if (error) {
-			setError(error.message);
-		} else {
-			navigate("/dashboard/home");
-		}
-	}
 
-	function handleDemoLogin() {
-		loginAsDemo();
-		navigate("/dashboard/home");
+		if (mode === "login") {
+			const { error } = await signInWithPassword(email, password);
+			setLoading(false);
+			if (error) {
+				setError("Email atau Password salah/belum terdaftar.");
+			} else {
+				navigate("/dashboard/home");
+			}
+		} else {
+			const { data, error } = await signUp(email, password);
+			setLoading(false);
+			if (error) {
+				setError(error.message);
+			} else if (data?.user?.identities?.length === 0) {
+				setError("Email ini sudah terdaftar. Silakan pindah ke tab Masuk.");
+			} else {
+				setSuccessMsg("Pendaftaran berhasil! Silakan masuk dengan akun Anda.");
+				setMode("login");
+			}
+		}
 	}
 
 	return (
@@ -72,7 +80,7 @@ export default function LoginPage() {
 
 				{/* Content */}
 				<div className="relative z-10 flex flex-col justify-end p-12 text-white">
-					<h1 className="text-5xl font-bold mb-4">HARVEY</h1>
+					<h1 className="text-5xl font-bold mb-4">AIR.IN</h1>
 					<p className="max-w-md text-lg text-white/90">
 						Decision Support System for Irrigation (AIR.IN Platform)
 					</p>
@@ -82,26 +90,36 @@ export default function LoginPage() {
 			{/* Right Section - Form */}
 			<div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-stone-50">
 				<div className="w-full max-w-sm">
-					<div className="mb-8">
-						<h2 className="text-2xl font-bold text-stone-800">Masuk Platform</h2>
-						<p className="text-stone-500 text-sm mt-1">
-							Silakan masuk atau gunakan Mode Demo Instan.
-						</p>
-					</div>
-
-					{/* Demo Mode Instant Access Button */}
-					<div className="mb-6">
+					<div className="flex bg-stone-200 p-1 rounded-xl mb-6">
 						<button
 							type="button"
-							onClick={handleDemoLogin}
-							className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 border border-emerald-500"
+							onClick={() => { setMode("login"); setError(""); setSuccessMsg(""); }}
+							className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+								mode === "login" ? "bg-white text-emerald-800 shadow" : "text-stone-600 hover:text-stone-900"
+							}`}
 						>
-							<span>🚀 Masuk Mode Demo (Langsung Coba Platform)</span>
+							Masuk Akun
 						</button>
-						<div className="relative my-6 text-center">
-							<div className="absolute inset-0 flex items-center"><div className="w-full border-t border-stone-300"></div></div>
-							<span className="relative bg-stone-50 px-3 text-xs text-stone-400 font-medium">atau masuk dengan akun</span>
-						</div>
+						<button
+							type="button"
+							onClick={() => { setMode("register"); setError(""); setSuccessMsg(""); }}
+							className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+								mode === "register" ? "bg-white text-emerald-800 shadow" : "text-stone-600 hover:text-stone-900"
+							}`}
+						>
+							Daftar Baru
+						</button>
+					</div>
+
+					<div className="mb-6">
+						<h2 className="text-2xl font-bold text-stone-800">
+							{mode === "login" ? "Masuk Platform" : "Daftar Akun AIR.IN"}
+						</h2>
+						<p className="text-stone-500 text-sm mt-1">
+							{mode === "login"
+								? "Masukkan Email & Password akun terdaftar Anda."
+								: "Buat akun baru untuk mengakses platform irigasi AIR.IN."}
+						</p>
 					</div>
 
 					{error && (
@@ -110,7 +128,13 @@ export default function LoginPage() {
 						</div>
 					)}
 
-					<form onSubmit={handleEmailLogin} className="space-y-4">
+					{successMsg && (
+						<div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-lg mb-4">
+							{successMsg}
+						</div>
+					)}
+
+					<form onSubmit={handleSubmit} className="space-y-4">
 						<div>
 							<label className="block text-sm font-medium text-stone-700 mb-1.5">
 								Email
@@ -133,6 +157,7 @@ export default function LoginPage() {
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								required
+								minLength={6}
 								className="w-full px-3 py-2.5 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 transition"
 								placeholder="••••••••"
 							/>
@@ -140,15 +165,11 @@ export default function LoginPage() {
 						<button
 							type="submit"
 							disabled={loading}
-							className="w-full bg-stone-800 hover:bg-stone-900 disabled:bg-stone-800 text-white font-semibold py-3 rounded-lg text-sm transition flex items-center justify-center gap-2"
+							className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-700 text-white font-semibold py-3 rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-sm"
 						>
-							{loading ? <Spinner /> : "Masuk dengan Email"}
+							{loading ? <Spinner /> : mode === "login" ? "Masuk dengan Email" : "Daftar Akun Baru"}
 						</button>
 					</form>
-
-					<p className="text-stone-400 text-xs text-center mt-6">
-						Belum punya akun? Hubungi admin P3A Anda.
-					</p>
 				</div>
 			</div>
 		</div>

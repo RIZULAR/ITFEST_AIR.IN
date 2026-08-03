@@ -9,42 +9,25 @@ import {
 
 const AuthContext = createContext(null);
 
-const DEMO_USER = {
-	id: "demo-juri-itfest",
-	email: "juri@itfest.id",
-	user_metadata: { full_name: "Juri & Penguji ITFEST" },
-};
-
 export function AuthProvider({ children }) {
-	// Default to Demo User so the app is instantly usable for judging & demo testing
-	const [user, setUser] = useState(() => {
-		const saved = localStorage.getItem("harvey_demo_user");
-		return saved ? JSON.parse(saved) : DEMO_USER;
-	});
-	const [loading, setLoading] = useState(false);
+	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		getSession().then(({ data: { session } }) => {
-			if (session?.user) {
-				setUser(session.user);
-			}
+			setUser(session?.user ?? null);
+			setLoading(false);
 		});
 
 		const {
 			data: { subscription },
 		} = onAuthStateChange((_event, session) => {
-			if (session?.user) {
-				setUser(session.user);
-			}
+			setUser(session?.user ?? null);
+			setLoading(false);
 		});
 
 		return () => subscription.unsubscribe();
 	}, []);
-
-	function loginAsDemo() {
-		setUser(DEMO_USER);
-		localStorage.setItem("harvey_demo_user", JSON.stringify(DEMO_USER));
-	}
 
 	async function signOut() {
 		try {
@@ -52,12 +35,11 @@ export function AuthProvider({ children }) {
 		} catch {
 			// ignore
 		}
-		localStorage.removeItem("harvey_demo_user");
 		setUser(null);
 	}
 
 	return (
-		<AuthContext.Provider value={{ user, loading, signOut, loginAsDemo }}>
+		<AuthContext.Provider value={{ user, loading, signOut }}>
 			{children}
 		</AuthContext.Provider>
 	);
