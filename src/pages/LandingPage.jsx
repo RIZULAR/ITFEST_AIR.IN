@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import { Link } from 'react-router-dom';
+import LogoImg from '@/assets/logo/logo.png';
 import {
 	Droplets,
 	ArrowRight,
@@ -61,12 +62,12 @@ export default function LandingPage() {
 				<div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-8">
 					{/* Logo */}
 					<div className="flex items-center gap-3">
-						<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white border border-emerald-500/20">
-							<Droplets className="h-6 w-6 animate-pulse" />
+						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 p-0.5">
+							<img src={LogoImg} className="w-full h-[140%] object-cover object-top" alt="air.in Logo" />
 						</div>
 						<div>
-							<span className="text-2xl font-extrabold tracking-tight text-emerald-600">air.in</span>
-							<p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Agriculture Platform</p>
+							<span className="text-2xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
+							<p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
 						</div>
 					</div>
 

@@ -326,7 +326,7 @@ export function HomePage({ fields, onDelete }) {
 			>
 				<MetricTile
 					icon={<ShieldCheck className="h-5 w-5" />}
-					label="Skor Ketahanan Klaster (air.in Score)"
+					label="Skor Ketahanan Klaster (airin Score)"
 					value={`${harveyScore} / 100`}
 					subtext={harveyScore >= 60 ? "Resiliensi Klaster Baik" : "Klaster Rentan Kekeringan"}
 					iconBg="rgba(4,120,87,0.08)"

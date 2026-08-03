@@ -11,7 +11,7 @@ import {
 	useParams,
 } from 'react-router-dom';
 
-import LogoImg from '@/assets/logo/logo.jpg';
+import LogoImg from '@/assets/logo/logo.png';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -130,8 +130,13 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 			>
 				<Stack direction="row" alignItems="center" spacing={2}>
 					<div className="flex items-center gap-3">
-						<img src={LogoImg} className="h-10" alt="Harvey Logo" />
-						<p className="text-2xl font-bold">Harvey</p>
+						<div className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white overflow-hidden flex-shrink-0 p-0.5">
+							<img src={LogoImg} className="w-full h-[140%] object-cover object-top" alt="air.in Logo" />
+						</div>
+						<div>
+							<span className="text-xl font-black tracking-tight text-emerald-600 block leading-tight">air.in</span>
+							<p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">Agriculture Platform</p>
+						</div>
 					</div>
 				</Stack>
 			</Box>

@@ -308,42 +308,45 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 						<Stack spacing={0}>
 							<Stack
 								direction="row"
+								alignItems="center"
 								sx={{
 									px: 2.5,
 									py: 1.5,
 									borderBottom: "1px solid",
 									borderColor: "divider",
-									bgcolor: "rgba(255,255,255,0.02)",
+									bgcolor: "#f8fafc",
 								}}
 							>
-								<Box sx={{ width: 32 }} />
+								{/* Circle & Chevron Spacer */}
+								<Box sx={{ width: 44, flexShrink: 0 }} />
+								
 								{[
-									"Nama Lahan",
-									"Luas",
-									"Suhu",
-									"Humid",
-									"Angin",
-									"Tanam",
-									"Tahap",
-									"Edit",
-									"Hapus",
-								].map((h) => (
+									["Nama Lahan", 3],
+									["Luas", 1],
+									["Suhu", 1],
+									["Humid", 1],
+									["Angin", 1],
+									["Tanam", 1],
+									["Tahap", 1],
+									["Aksi", 0.8],
+								].map(([h, flexVal]) => (
 									<Typography
 										key={h}
 										variant="caption"
-										fontWeight={700}
+										fontWeight={800}
 										sx={{
-											flex: 1,
+											flex: flexVal,
 											color: "text.secondary",
 											textTransform: "uppercase",
 											letterSpacing: 0.8,
+											textAlign: h === "Aksi" ? "center" : "left",
 										}}
 									>
 										{h}
 									</Typography>
 								))}
 							</Stack>
-							{filteredFields.map((f) => {
+							{filteredFields.map((f, idx) => {
 								const g = getGrowthStage(f.plantingDate);
 								const isExpanded = expandedId === f.id;
 								return (
@@ -373,29 +376,59 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 											}}
 										>
 											<Box
-												sx={{
-													width: 32,
-													display: "flex",
-													color: "text.secondary",
-												}}
+												sx={{ display: "flex", alignItems: "center", gap: 0.5, mr: 1.5, flexShrink: 0 }}
 											>
+												<Box
+													sx={{
+														width: 24,
+														height: 24,
+														borderRadius: "50%",
+														bgcolor: "rgba(4,120,87,0.06)",
+														border: "1px solid rgba(4,120,87,0.18)",
+														display: "flex",
+														alignItems: "center",
+														justifyContent: "center",
+														flexShrink: 0,
+													}}
+												>
+													<Typography
+														variant="caption"
+														fontWeight={800}
+														sx={{
+															color: "#047857",
+															fontSize: 10,
+														}}
+													>
+														{idx + 1}
+													</Typography>
+												</Box>
 												<ExpandMoreIcon
 													sx={{
-														fontSize: 18,
-														transition: "transform 0.2s",
+														fontSize: 16,
+														color: "text.secondary",
 														transform: isExpanded
 															? "rotate(180deg)"
 															: "rotate(0deg)",
+														transition: "transform 0.2s",
 													}}
 												/>
 											</Box>
-											<Typography
-												variant="body2"
-												fontWeight={600}
-												sx={{ flex: 1 }}
-											>
-												{f.name}
-											</Typography>
+											<Box sx={{ flex: 3, minWidth: 0 }}>
+												<Typography
+													variant="body2"
+													fontWeight={700}
+													sx={{ color: "text.primary", lineHeight: 1.2 }}
+												>
+													{f.name}
+												</Typography>
+												<Typography
+													variant="caption"
+													color="text.secondary"
+													sx={{ display: "block", lineHeight: 1.2, mt: 0.25 }}
+												>
+													{f.crop_type ?? "Jenis tanaman belum diisi"}
+												</Typography>
+											</Box>
 											<Typography variant="body2" sx={{ flex: 1 }}>
 												{f.area_ha?.toFixed(2)} ha
 											</Typography>
@@ -432,20 +465,22 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 													</Box>
 												)}
 											</Box>
-											<IconButton
-												size="small"
-												onClick={(e) => handleEditOpen(f, e)}
-												sx={{ color: "primary.main", flex: 1 }}
-											>
-												<EditIcon sx={{ fontSize: 16 }} />
-											</IconButton>
-											<IconButton
-												size="small"
-												onClick={(e) => handleDelete(f.id, e)}
-												sx={{ color: "error.main", flex: 1 }}
-											>
-												<DeleteIcon sx={{ fontSize: 16 }} />
-											</IconButton>
+											<Stack direction="row" spacing={0.5} justifyContent="center" sx={{ flex: 0.8, flexShrink: 0 }}>
+												<IconButton
+													size="small"
+													onClick={(e) => handleEditOpen(f, e)}
+													sx={{ color: "primary.main" }}
+												>
+													<EditIcon sx={{ fontSize: 16 }} />
+												</IconButton>
+												<IconButton
+													size="small"
+													onClick={(e) => handleDelete(f.id, e)}
+													sx={{ color: "error.main" }}
+												>
+													<DeleteIcon sx={{ fontSize: 16 }} />
+												</IconButton>
+											</Stack>
 										</Stack>
 
 										<Collapse in={isExpanded} timeout="auto" mountOnEnter unmountOnExit={false}>
@@ -573,17 +608,22 @@ export function FieldsPage({ fields, onDelete, onUpdate }) {
 			>
 				<DialogTitle fontWeight={700}>Edit Lahan</DialogTitle>
 				<DialogContent>
-					<Stack spacing={2} mt={1}>
-						<TextField
-							label="Nama Lahan"
-							value={editField?.name ?? ""}
-							onChange={(e) =>
-								setEditField((f) => ({ ...f, name: e.target.value }))
-							}
-							onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
-							fullWidth
-							size="small"
-						/>
+					<Stack spacing={2.5} mt={2}>
+						<FormControl variant="outlined" size="small" fullWidth>
+							<InputLabel shrink htmlFor="edit-name">
+								Nama Lahan
+							</InputLabel>
+							<OutlinedInput
+								id="edit-name"
+								value={editField?.name ?? ""}
+								onChange={(e) =>
+									setEditField((f) => ({ ...f, name: e.target.value }))
+								}
+								onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
+								label="Nama Lahan"
+								notched
+							/>
+						</FormControl>
 						<FormControl variant="outlined" size="small" fullWidth>
 							<InputLabel shrink htmlFor="edit-planting-date">
 								Tanggal Tanam

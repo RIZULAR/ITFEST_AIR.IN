@@ -397,8 +397,8 @@ export function AnalyticsPage({ fields = [] }) {
 						</Box>
 
 						{/* Custom SVG Line Chart representation */}
-						<Box sx={{ position: "relative", height: 160, width: "100%", mt: 2 }}>
-							<svg viewBox="0 0 400 130" width="100%" height="100%" style={{ overflow: "visible" }}>
+						<Box sx={{ position: "relative", height: 180, width: "100%", mt: 2 }}>
+							<svg viewBox="0 0 400 160" width="100%" height="100%" style={{ overflow: "visible" }}>
 								{/* Gradients */}
 								<defs>
 									<linearGradient id="curve-grad" x1="0" y1="0" x2="0" y2="1">
@@ -409,32 +409,32 @@ export function AnalyticsPage({ fields = [] }) {
 
 								{/* Grid Lines & Y-Axis Labels */}
 								<g stroke="#f1f5f9" strokeWidth="1">
-									<line x1="30" y1="20" x2="380" y2="20" strokeDasharray="4" />
-									<line x1="30" y1="50" x2="380" y2="50" strokeDasharray="4" />
-									<line x1="30" y1="80" x2="380" y2="80" strokeDasharray="4" />
-									<line x1="30" y1="110" x2="380" y2="110" strokeDasharray="4" />
+									<line x1="30" y1="40" x2="380" y2="40" strokeDasharray="4" />
+									<line x1="30" y1="70" x2="380" y2="70" strokeDasharray="4" />
+									<line x1="30" y1="100" x2="380" y2="100" strokeDasharray="4" />
+									<line x1="30" y1="130" x2="380" y2="130" strokeDasharray="4" />
 								</g>
 								
 								{/* Y-Axis text labels */}
 								<g fill="#94a3b8" fontSize="9" fontWeight="700" textAnchor="end">
-									<text x="22" y="23">1.2</text>
-									<text x="22" y="53">0.8</text>
-									<text x="22" y="83">0.4</text>
-									<text x="22" y="113">0.0</text>
+									<text x="22" y="43">1.2</text>
+									<text x="22" y="73">0.8</text>
+									<text x="22" y="103">0.4</text>
+									<text x="22" y="133">0.0</text>
 								</g>
 
 								{/* Baseline */}
-								<line x1="30" y1="110" x2="380" y2="110" stroke="#cbd5e1" strokeWidth="1.5" />
+								<line x1="30" y1="130" x2="380" y2="130" stroke="#cbd5e1" strokeWidth="1.5" />
 								
 								{/* Area Curve Fill */}
 								<path
-									d="M 40 110 Q 120 70, 200 20 T 360 90 L 360 110 L 40 110 Z"
+									d="M 40 130 Q 120 90, 200 40 T 360 110 L 360 130 L 40 130 Z"
 									fill="url(#curve-grad)"
 								/>
 								
 								{/* Stroke Line Curve */}
 								<path
-									d="M 40 110 Q 120 70, 200 20 T 360 90"
+									d="M 40 130 Q 120 90, 200 40 T 360 110"
 									fill="none"
 									stroke="#10b981"
 									strokeWidth="3.5"
@@ -442,17 +442,17 @@ export function AnalyticsPage({ fields = [] }) {
 								/>
 
 								{/* Dots along stages */}
-								<circle cx="40" cy="110" r="5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
-								<circle cx="120" cy="74" r="5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
+								<circle cx="40" cy="130" r="5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
+								<circle cx="120" cy="94" r="5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
 								
 								{/* Peak point (Red glowing ring) */}
-								<circle cx="200" cy="20" r="9" fill="rgba(239,68,68,0.2)" />
-								<circle cx="200" cy="20" r="5.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
+								<circle cx="200" cy="40" r="9" fill="rgba(239,68,68,0.2)" />
+								<circle cx="200" cy="40" r="5.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
 								
-								<circle cx="360" cy="90" r="5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
+								<circle cx="360" cy="110" r="5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
 
 								{/* Peak label tooltip box */}
-								<g transform="translate(200, -5)">
+								<g transform="translate(200, 15)">
 									<rect x="-75" y="-18" width="150" height="20" rx="4" fill="#1e293b" />
 									<text x="0" y="-5" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
 										Puncak Generatif (Kc = 1.15)
