@@ -177,6 +177,11 @@ export function WaterAllocationPage({ fields }) {
 			.finally(() => setLoading(false));
 	}, [fields, elNinoSeverity]);
 
+	// Reset history cache when El Niño changes so trend graphs re-fetch with new level
+	useEffect(() => {
+		setHistoryMap({});
+	}, [elNinoSeverity]);
+
 	const ranked = calcWaterAllocation(fields, elNinoSeverity, riskScoreMap, totalWaterSupply);
 	const totalWater = ranked.reduce((s, f) => s + f.waterAlloc_L, 0);
 
