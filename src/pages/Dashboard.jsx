@@ -51,6 +51,8 @@ import {
 } from './WaterAllocationPage.jsx';
 import { getWeatherSummary } from '../services/weatherService.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { Sun, Flame } from 'lucide-react';
+
 
 const theme = createTheme({
 	palette: {
@@ -129,7 +131,7 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 					borderColor: "divider",
 				}}
 			>
-				<Stack direction="row" alignItems="center" spacing={2}>
+				<Stack direction="row" sx={{ alignItems: "center" }} spacing={2}>
 					<div className="flex items-center gap-3">
 						<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 flex-shrink-0">
 							<img src={LogoImg} className="h-full w-full object-contain" alt="air.in Logo" />
@@ -392,7 +394,7 @@ export default function Dashboard() {
 							gap: 2,
 						}}
 					>
-						<Stack direction="row" alignItems="center" spacing={1}>
+						<Stack direction="row" sx={{ alignItems: "center" }} spacing={1}>
 							{isMobile && (
 								<IconButton
 									onClick={() => setDrawerOpen(true)}
@@ -419,12 +421,12 @@ export default function Dashboard() {
 						</Stack>
 
 						{!isMobile && (
-							<Stack direction="row" spacing={1.5} alignItems="center">
+							<Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
 								{/* Weather Pill */}
 								<Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#f8fafc" }}>
 									<Sun className="h-4.5 w-4.5 text-slate-500" />
 									<Stack spacing={0.25}>
-										<Stack direction="row" spacing={1} alignItems="center" sx={{ leading: "none" }}>
+										<Stack direction="row" spacing={1} sx={{ alignItems: "center", leading: "none" }}>
 											<Typography variant="caption" fontWeight={700} color="text.primary" sx={{ fontSize: 11 }}>
 												{weather.desc}
 											</Typography>
@@ -443,7 +445,7 @@ export default function Dashboard() {
 								<Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#f8fafc" }}>
 									<Flame className="h-4.5 w-4.5 text-slate-500" />
 									<Stack spacing={0.25}>
-										<Stack direction="row" spacing={1} alignItems="center" sx={{ leading: "none" }}>
+										<Stack direction="row" spacing={1} sx={{ alignItems: "center", leading: "none" }}>
 											<Typography variant="caption" fontWeight={700} color="text.primary" sx={{ fontSize: 11 }}>
 												El Niño Status
 											</Typography>

@@ -299,7 +299,7 @@ export function HomePage({ fields, onDelete }) {
 				}}
 			>
 				<Box sx={{ position: "relative", zIndex: 1, maxWidth: 720 }}>
-					<Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+					<Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.5 }}>
 						<Box sx={{ bgcolor: "rgba(4,120,87,0.08)", px: 1.5, py: 0.5, borderRadius: 5, display: "inline-flex", alignItems: "center", gap: 1 }}>
 							<Sparkles className="h-3.5 w-3.5 text-emerald-600" />
 							<Typography variant="caption" fontWeight={700} color="#047857">
@@ -423,7 +423,7 @@ export function HomePage({ fields, onDelete }) {
 					<Stack spacing={1.75} sx={{ mt: 1 }}>
 						{/* Low Risk Bar */}
 						<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-							<Stack direction="row" alignItems="center" spacing={1} sx={{ width: 65, flexShrink: 0 }}>
+							<Stack direction="row" spacing={1} sx={{ alignItems: "center", width: 65, flexShrink: 0 }}>
 								<Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#10b981" }} />
 								<Typography variant="caption" fontWeight={700} color="text.secondary">Rendah</Typography>
 							</Stack>
@@ -437,7 +437,7 @@ export function HomePage({ fields, onDelete }) {
 
 						{/* Medium Risk Bar */}
 						<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-							<Stack direction="row" alignItems="center" spacing={1} sx={{ width: 65, flexShrink: 0 }}>
+							<Stack direction="row" spacing={1} sx={{ alignItems: "center", width: 65, flexShrink: 0 }}>
 								<Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#f59e0b" }} />
 								<Typography variant="caption" fontWeight={700} color="text.secondary">Sedang</Typography>
 							</Stack>
@@ -451,7 +451,7 @@ export function HomePage({ fields, onDelete }) {
 
 						{/* High Risk Bar */}
 						<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-							<Stack direction="row" alignItems="center" spacing={1} sx={{ width: 65, flexShrink: 0 }}>
+							<Stack direction="row" spacing={1} sx={{ alignItems: "center", width: 65, flexShrink: 0 }}>
 								<Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#ef4444" }} />
 								<Typography variant="caption" fontWeight={700} color="text.secondary">Tinggi</Typography>
 							</Stack>
@@ -583,8 +583,8 @@ export function HomePage({ fields, onDelete }) {
 									<Stack
 										key={i}
 										spacing={1.25}
-										alignItems="center"
 										sx={{
+											alignItems: "center",
 											p: 2,
 											borderRight: i === 4 ? 0 : "1px solid #e2e8f0",
 											flex: 1,
@@ -630,8 +630,8 @@ export function HomePage({ fields, onDelete }) {
 									<Stack
 										key={i}
 										spacing={1.25}
-										alignItems="center"
 										sx={{
+											alignItems: "center",
 											p: 2,
 											borderRight: i === 4 ? 0 : "1px solid #e2e8f0",
 											flex: 1,
@@ -793,9 +793,9 @@ function FieldItem({ field, onDelete }) {
 				<Stack
 					direction="row"
 					justifyContent="space-between"
-					alignItems="center"
+					sx={{ alignItems: "center" }}
 				>
-					<Stack direction="row" alignItems="center" spacing={1.5}>
+					<Stack direction="row" sx={{ alignItems: "center" }} spacing={1.5}>
 						<Box
 							sx={{
 								width: 10,

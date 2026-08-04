@@ -24,6 +24,8 @@ import {
 	CloudSun
 } from 'lucide-react';
 
+import { useAuth } from '../contexts/AuthContext';
+
 function AnimatedSection({ children, delay = 0, className = "" }) {
 	const ref = useRef();
 	const [visible, setVisible] = useState(false);
@@ -54,6 +56,8 @@ function AnimatedSection({ children, delay = 0, className = "" }) {
 }
 
 export default function LandingPage() {
+	const { user } = useAuth();
+
 	return (
 		<div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-emerald-500 selection:text-white overflow-x-hidden relative">
 
@@ -81,9 +85,15 @@ export default function LandingPage() {
 
 					{/* CTA Button */}
 					<div className="flex items-center gap-3">
-						<Link to="/login" className="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors px-2 py-1">
-							Masuk Akun
-						</Link>
+						{user ? (
+							<Link to="/dashboard/home" className="text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 hover:bg-emerald-100 transition-colors px-3.5 py-1.5 rounded-xl">
+								👤 {user.email ? user.email.split("@")[0] : "Akun Saya"}
+							</Link>
+						) : (
+							<Link to="/login" className="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors px-2 py-1">
+								Masuk Akun
+							</Link>
+						)}
 						<Link to="/dashboard" className="relative inline-flex h-11 items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-700 px-6 text-sm font-bold text-white border border-emerald-700 transition-all hover:scale-[102%] active:scale-95">
 							Buka Dashboard
 							<ArrowRight className="ml-2 h-4 w-4" />

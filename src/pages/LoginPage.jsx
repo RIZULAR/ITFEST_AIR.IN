@@ -33,13 +33,20 @@ function Spinner() {
 
 export default function LoginPage() {
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	const { user, loading: authLoading } = useAuth();
 	const [mode, setMode] = useState("login"); // 'login' | 'register'
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [successMsg, setSuccessMsg] = useState("");
+
+	useEffect(() => {
+		if (!authLoading && user) {
+			navigate("/dashboard/home", { replace: true });
+		}
+	}, [user, authLoading, navigate]);
+
 
 
 

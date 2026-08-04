@@ -39,8 +39,22 @@ function App() {
 		<Routes>
 			<Route path="/" element={<LandingPage />} />
 			<Route path="/login" element={<LoginPage />} />
-			<Route path="/app" element={<Navigate to="/dashboard/map" replace />} />
-			<Route path="/dashboard" element={<Navigate to="/dashboard/home" replace />} />
+			<Route
+				path="/app"
+				element={
+					<ProtectedRoute>
+						<Navigate to="/dashboard/map" replace />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/dashboard"
+				element={
+					<ProtectedRoute>
+						<Navigate to="/dashboard/home" replace />
+					</ProtectedRoute>
+				}
+			/>
 			<Route
 				path="/dashboard/:page"
 				element={
@@ -49,6 +63,7 @@ function App() {
 					</ProtectedRoute>
 				}
 			/>
+			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);
 }
