@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://air-in-be.vercel.app'
 const API = `${BASE_URL}/api/fields`
 const RISK_API = `${BASE_URL}/api/calculate-risk`
 const RISK_BATCH_API = `${BASE_URL}/api/risks/batch`
