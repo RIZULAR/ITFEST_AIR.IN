@@ -49,8 +49,8 @@ import {
 	calcRiskScore,
 	WaterAllocationPage,
 } from './WaterAllocationPage.jsx';
-import { Sun, Flame } from 'lucide-react';
 import { getWeatherSummary } from '../services/weatherService.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -108,6 +108,7 @@ const PAGE_TITLES = {
 };
 
 function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
+	const { user, signOut } = useAuth();
 	return (
 		<Box
 			sx={{
@@ -207,7 +208,7 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 						width: "100%",
 					}}
 				>
-					User
+					{user?.email ? user.email.split("@")[0] : "User"}
 				</Button>
 				<Menu
 					anchorEl={anchorEl}
@@ -238,9 +239,10 @@ function Sidebar({ page, anchorEl, setAnchorEl, isMobile, onClose }) {
 						Buka Peta
 					</Button>
 					<Button
-						onClick={() => {
+						onClick={async () => {
 							setAnchorEl(null);
-							localStorage.removeItem("supabase-auth-token");
+							if (onClose) onClose();
+							await signOut();
 							window.location.href = "/login";
 						}}
 						startIcon={<LogoutIcon sx={{ fontSize: 18 }} />}
