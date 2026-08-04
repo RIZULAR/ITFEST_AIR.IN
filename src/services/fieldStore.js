@@ -155,22 +155,18 @@ export async function calculateRiskBatch(fields, elNino = 0) {
 }
 
 export async function getRiskHistory(fieldId, days = 30, elNino = 0) {
-  try {
-    const res = await fetch(`${RISK_HISTORY_API}/${fieldId}?days=${days}&elNino=${elNino}`)
-    if (res.ok) return await res.json()
-  } catch {
-    // fallback
-  }
-
+  // Generate realistic demo history based on fieldId for visual variety
+  const seed = fieldId ? fieldId.charCodeAt(2) + fieldId.charCodeAt(5) : 42
+  const baseLine = 0.35 + (seed % 30) / 100  // different baseline per field
   const history = []
   const today = new Date()
   for (let i = days; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
-    const baseScore = 0.45 + (Math.sin(i / 3) * 0.15) + (elNino * 0.04)
+    const baseScore = baseLine + (Math.sin(i / 4 + seed) * 0.18) + (Math.cos(i / 9) * 0.08) + (elNino * 0.04)
     history.push({
       date: date.toISOString().split('T')[0],
-      riskScore: Math.min(1, Math.max(0.1, baseScore))
+      riskScore: Math.min(0.95, Math.max(0.1, baseScore))
     })
   }
   return history
