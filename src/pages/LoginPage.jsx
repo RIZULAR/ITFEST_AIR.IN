@@ -4,6 +4,8 @@ import LoginBgImg from '../assets/images/login.webp';
 import LogoImg from '../assets/logo/logo.png';
 import { signInWithPassword, signUp } from '../services/authService';
 
+import { useAuth } from '../contexts/AuthContext';
+
 function Spinner() {
 	return (
 		<svg
@@ -31,12 +33,19 @@ function Spinner() {
 
 export default function LoginPage() {
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const [mode, setMode] = useState("login"); // 'login' | 'register'
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [successMsg, setSuccessMsg] = useState("");
+
+	useEffect(() => {
+		if (user) {
+			navigate("/dashboard/home", { replace: true });
+		}
+	}, [user, navigate]);
 
 	async function handleSubmit(e) {
 		e.preventDefault();
