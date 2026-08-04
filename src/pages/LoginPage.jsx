@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginBgImg from '@/assets/images/login.webp';
-import LogoImg from '@/assets/logo/logo.png';
+import LoginBgImg from '../assets/images/login.webp';
+import LogoImg from '../assets/logo/logo.png';
 import { signInWithPassword, signUp } from '../services/authService';
 
 function Spinner() {
