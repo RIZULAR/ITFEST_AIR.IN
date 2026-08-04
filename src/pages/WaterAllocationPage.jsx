@@ -136,7 +136,10 @@ export function riskLabel(score) {
 export function WaterAllocationPage({ fields }) {
 	const [riskFilter, setRiskFilter] = useState("all");
 	const [stageFilter, setStageFilter] = useState("all");
-	const [elNinoSeverity, setElNinoSeverity] = useState(0);
+	const [elNinoSeverity, setElNinoSeverity] = useState(() => {
+		const saved = localStorage.getItem("elNinoSeverity");
+		return saved !== null ? Number(saved) : 0;
+	});
 	const [expandedId, setExpandedId] = useState(null);
 	const [riskScoreMap, setRiskScoreMap] = useState({});
 	const [historyMap, setHistoryMap] = useState({});
@@ -144,7 +147,18 @@ export function WaterAllocationPage({ fields }) {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-	const [totalWaterSupply, setTotalWaterSupply] = useState(150000);
+	const [totalWaterSupply, setTotalWaterSupply] = useState(() => {
+		const saved = localStorage.getItem("totalWaterSupply");
+		return saved !== null ? Number(saved) : 150000;
+	});
+
+	useEffect(() => {
+		localStorage.setItem("elNinoSeverity", elNinoSeverity);
+	}, [elNinoSeverity]);
+
+	useEffect(() => {
+		localStorage.setItem("totalWaterSupply", totalWaterSupply);
+	}, [totalWaterSupply]);
 
 	useEffect(() => {
 		if (!fields.length) return;
