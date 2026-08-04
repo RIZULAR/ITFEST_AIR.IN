@@ -298,7 +298,7 @@ export default function Dashboard() {
 			if (saved !== null) setElNinoSeverity(Number(saved));
 		};
 		window.addEventListener("storage", handleStorageChange);
-		const interval = setInterval(handleStorageChange, 1000);
+		const interval = setInterval(handleStorageChange, 200);
 		return () => {
 			window.removeEventListener("storage", handleStorageChange);
 			clearInterval(interval);
