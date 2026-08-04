@@ -35,6 +35,12 @@ export function AuthProvider({ children }) {
 		} catch {
 			// ignore
 		}
+		try {
+			localStorage.clear();
+			sessionStorage.clear();
+		} catch {
+			// ignore
+		}
 		setUser(null);
 	}
 

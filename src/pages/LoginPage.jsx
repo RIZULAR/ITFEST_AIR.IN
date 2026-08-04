@@ -41,11 +41,7 @@ export default function LoginPage() {
 	const [error, setError] = useState("");
 	const [successMsg, setSuccessMsg] = useState("");
 
-	useEffect(() => {
-		if (user) {
-			navigate("/dashboard/home", { replace: true });
-		}
-	}, [user, navigate]);
+
 
 	async function handleSubmit(e) {
 		e.preventDefault();
