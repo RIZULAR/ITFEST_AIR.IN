@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 brainstorm/ALMER.md
+
+# Environment variables - JANGAN DI-COMMIT!
+.env
+.env.local
+.env.production
+.env.*
